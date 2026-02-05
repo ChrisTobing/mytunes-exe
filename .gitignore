@@ -1,0 +1,32 @@
+# --- Python & Django ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+.coverage
+htmlcov/
+
+# Virtual Environments (Critical to ignore)
+venv/
+env/
+.env
+.venv/
+
+# --- React & Node.js ---
+node_modules/
+npm-debug.log
+yarn-error.log
+dist/
+build/
+.eslintcache
+
+# --- System Files (Mac/Windows) ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# --- IDE Settings (VS Code/PyCharm) ---
+.idea/
+.vscode/
+*.swp

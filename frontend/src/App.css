@@ -1,0 +1,45 @@
+.window-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[role="tabpanel"] {
+  padding-top: 16px;
+}
+
+[role="tabpanel"] .field-row {
+  width: 100%;
+}
+
+[role="tabpanel"] .field-row input {
+  flex: 1;
+}
+
+.selected {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  gap: 5px;
+  width: 100%;
+}
+
+.selected-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.selected-content-text {
+  text-align: left;
+}
+
+.selected-content-text p {
+  margin: 0 0 2px 0;
+}
+
+.selected-content-text p:last-child {
+  margin-bottom: 0;
+}
