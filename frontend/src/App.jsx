@@ -1,13 +1,34 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import "xp.css/dist/XP.css"
 import './App.css'
 import sampleAlbumArt from './assets/samplealbum.jpeg'
+import { searchToRows } from './utils/functions'
 
 function App() {
   const [count, setCount] = useState(0)
+  const [inputValue, setInputValue] = useState('')
+  const [songsList, setSongsList] = useState([])
+  const [searchClicked, setSearchClicked] = useState(false)
 
+  useEffect(() => {
+    if (!searchClicked) return
+    const query = inputValue.trim()
+    if (!query) {
+      setSearchClicked(false)
+      return
+    }
+    fetch(`http://localhost:8000/api/songs/?query=${encodeURIComponent(query)}`)
+      .then(response => response.json())
+      .then(data => setSongsList(searchToRows(data)))
+      .catch(error => console.error('Error:', error))
+    setSearchClicked(false)
+  }, [searchClicked, inputValue])
+
+  const handleSearch = () => {
+    setSearchClicked(true)
+  }
   return (
     <>
       <div className="window-container">
@@ -25,28 +46,13 @@ function App() {
               <h5>You haven't entered a song today. Make an entry to see your friends' entries!</h5>
               <div className="field-row">
                 <label for="text21">Search for:</label>
-                <input type="text" id="text21" name="text21" />
-                <button>Find</button>
+                <input type="text" id="text21" name="text21" value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
+                <button onClick={handleSearch}>Find</button>
               </div>
               <div className="sunken-panel" style={{ height: '150px', marginTop: '10px', overflowY: 'scroll', background: 'white' }}>
                 <table style={{ width: '100%' }}>
                   <tbody>
-                    <tr>
-                      <td>🎵</td>
-                      <td>Bohemian Rhapsody - Queen</td>
-                    </tr>
-                    <tr>
-                      <td>🎵</td>
-                      <td>The Beatles - Hey Jude</td>
-                    </tr>
-                    <tr>
-                      <td>🎵</td>
-                      <td>The Rolling Stones - Satisfaction</td>
-                    </tr>
-                    <tr>
-                      <td>🎵</td>
-                      <td>The Who - Baba O'Riley</td>
-                    </tr>
+                    {songsList}
                   </tbody>
                 </table>
               </div>
