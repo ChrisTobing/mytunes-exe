@@ -4,13 +4,14 @@ import viteLogo from '/vite.svg'
 import "xp.css/dist/XP.css"
 import './App.css'
 import sampleAlbumArt from './assets/samplealbum.jpeg'
+import placeHolderAlbumArt from './assets/placeholderMusic.jpg'
 import { searchToRows } from './utils/functions'
 
 function App() {
-  const [count, setCount] = useState(0)
   const [inputValue, setInputValue] = useState('')
-  const [songsList, setSongsList] = useState([])
+  const [songsData, setSongsData] = useState([])
   const [searchClicked, setSearchClicked] = useState(false)
+  const [selectedTrack, setSelectedTrack] = useState(null)
 
   useEffect(() => {
     if (!searchClicked) return
@@ -21,13 +22,27 @@ function App() {
     }
     fetch(`http://localhost:8000/api/songs/?query=${encodeURIComponent(query)}`)
       .then(response => response.json())
-      .then(data => setSongsList(searchToRows(data)))
+      .then(data => setSongsData(data))
       .catch(error => console.error('Error:', error))
     setSearchClicked(false)
   }, [searchClicked, inputValue])
 
   const handleSearch = () => {
     setSearchClicked(true)
+  }
+
+  const handleTrackClick = (track_id, track_name, track_artist, track_album, track_albumArt) => {
+    if (selectedTrack && selectedTrack.id === track_id) {
+      setSelectedTrack(null)
+    } else {
+      setSelectedTrack({
+        id: track_id,
+        name: track_name,
+        artist: track_artist,
+        album: track_album,
+        albumArt: track_albumArt
+      })
+    }
   }
   return (
     <>
@@ -52,18 +67,19 @@ function App() {
               <div className="sunken-panel" style={{ height: '150px', marginTop: '10px', overflowY: 'scroll', background: 'white' }}>
                 <table style={{ width: '100%' }}>
                   <tbody>
-                    {songsList}
+                    {searchToRows(songsData, handleTrackClick, selectedTrack)}
                   </tbody>
                 </table>
               </div>
               <div className="selected">
                 <label for="text22">Selected:</label>
                 <div className="selected-content">
-                  <img src={sampleAlbumArt} alt="Sample Album Art" style={{ width: '50px', height: '50px', border: '2px solid gray', borderStyle: 'double' }} />
+                  <img src={selectedTrack ? selectedTrack.albumArt : placeHolderAlbumArt} alt="Sample Album Art"
+                    style={{ width: '50px', height: '50px', border: '2px solid gray', borderStyle: 'double' }} />
                   <div className="selected-content-text">
-                    <p>JOJI - Slow Dancing in the Dark</p>
-                    <p>Album: BALLADS 1</p>
-                    <p>Date: 2026-02-05</p>
+                    <p>{selectedTrack ? selectedTrack.artist + ' - ' + selectedTrack.name : 'No song selected'}</p>
+                    <p>Album: {selectedTrack ? selectedTrack.album : 'No album selected'}</p>
+                    <p>Date: {new Date().toLocaleDateString()}</p>
                   </div>
                 </div>
               </div>
