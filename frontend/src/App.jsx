@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import "xp.css/dist/XP.css"
 import './App.css'
-import sampleAlbumArt from './assets/samplealbum.jpeg'
 import placeHolderAlbumArt from './assets/placeholderMusic.jpg'
 import { searchToRows } from './utils/functions'
 
@@ -50,6 +47,9 @@ function App() {
         <div className="window">
           <div className="title-bar">
             <div className="title-bar-text">Mytunes.exe</div>
+            <div className="title-bar-controls">
+              <button aria-label="Close"></button>
+            </div>
           </div>
           <div className="window-body">
             <menu role="tablist">
