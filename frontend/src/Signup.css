@@ -1,0 +1,28 @@
+.password-requirements-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 0px;
+    padding: 0px 0px;
+}
+
+.password-requirements {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 8px;
+}
+
+.password-requirements-title {
+    font-weight: bold;
+    color: #333;
+}
+
+.requirement-satisfied {
+    color: #008000;
+    text-decoration: line-through;
+}

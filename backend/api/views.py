@@ -2,7 +2,10 @@ from django.shortcuts import render
 
 import requests
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from .models import UserAuth
+from rest_framework_simplejwt.tokens import RefreshToken
 
 @api_view(['GET'])
 def get_songs(request):
@@ -30,3 +33,57 @@ def get_songs(request):
         return Response(clean_data)
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+
+
+@api_view(['POST'])
+def register(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user, error = UserAuth.register(username, password)
+    if user:
+        return Response({"message": "User registered successfully", "user": user.id}, status=201)
+    else:
+        return Response({"error": error}, status=400)
+
+
+@api_view(['POST'])
+def login(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user, error = UserAuth.login(username, password)
+    if user:
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+
+        response = Response({"message": "Login successful", 
+        "user": user.id, 
+        "access_token": access_token}, status=200)
+
+        response.set_cookie(key="refresh_token", value=str(refresh), httponly=True, secure=False, samesite="Lax")
+        return response
+    else:
+        response = Response({"error": error}, status=401)
+        response.delete_cookie(key="refresh_token")
+        return response
+        
+@api_view(['POST'])
+def refresh_token(request):
+    refresh_token = request.COOKIES.get('refresh_token')
+    if not refresh_token:
+        return Response({"error": "No refresh token"}, status=401)
+    try:
+        refresh = RefreshToken(refresh_token)
+        return Response({"access_token": str(refresh.access_token)}, status=200)
+    except Exception:
+        return Response({"error": "Invalid or expired refresh token"}, status=400)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_profile(request):
+    user = request.user
+    return Response({
+        "id": user.id,
+        "username": user.username,
+    }, status=200)
+
