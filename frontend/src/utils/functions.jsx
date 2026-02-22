@@ -4,7 +4,7 @@ export const searchToRows = (songsList, handleTrackClick, selectedTrack) => {
         return (
             <tr
                 key={song.id}
-                onClick={() => handleTrackClick(song.id, song.name, song.artist, song.album, song.albumArt)}
+                onClick={() => handleTrackClick(song.id, song.name, song.artist, song.album, song.albumArt, song.previewUrl)}
                 style={{
                     cursor: 'pointer',
                     backgroundColor: isSelected ? '#166aee' : 'white',

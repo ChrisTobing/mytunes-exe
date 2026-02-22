@@ -4,7 +4,7 @@ import requests
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from .models import UserAuth
+from .models import UserAuth, Entry
 from rest_framework_simplejwt.tokens import RefreshToken
 
 @api_view(['GET'])
@@ -82,8 +82,42 @@ def refresh_token(request):
 @permission_classes([IsAuthenticated])
 def get_profile(request):
     user = request.user
+    entries = Entry.objects.filter(user=user).order_by('-created_at').values(
+        'id', 'song_id', 'song_name', 'song_artist',
+        'song_album', 'song_album_art', 'song_preview_url',
+        'comment', 'created_at'
+    )
     return Response({
         "id": user.id,
         "username": user.username,
+        "entries": list(entries)
     }, status=200)
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_entry(request):
+    user = request.user
+    song_id = request.data.get('song_id')
+    song_name = request.data.get('song_name')
+    song_artist = request.data.get('song_artist')
+    song_album = request.data.get('song_album')
+    song_album_art = request.data.get('song_album_art')
+    song_preview_url = request.data.get('song_preview_url')
+    comment = request.data.get('comment')
+    if not all([song_id, song_name, song_artist, song_album, song_album_art]):
+        return Response({"error": "Missing required song fields"}, status=400)
+    try:
+        entry = Entry.objects.create(
+            user=user,
+            song_id=song_id,
+            song_name=song_name,
+            song_artist=song_artist,
+            song_album=song_album,
+            song_album_art=song_album_art,
+            song_preview_url=song_preview_url or "",
+            comment=comment or "",
+        )
+        return Response({"message": "Entry added successfully", "entry": entry.id}, status=201)
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)

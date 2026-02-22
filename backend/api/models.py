@@ -8,9 +8,6 @@ from django.core.exceptions import ValidationError
 class UserAuth:
     """
     Helper class for user registration and authentication.
-
-    Password hashing: Django's create_user() hashes with PBKDF2+SHA256 automatically.
-    SQL injection: Django's ORM uses parameterised queries — raw SQL is never constructed.
     """
 
     @staticmethod
@@ -43,3 +40,15 @@ class UserAuth:
 
     def __str__(self):
         return f"{self.title} - {self.user.username}"
+
+class Entry(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    song_id = models.BigIntegerField()
+    song_name = models.CharField(max_length=255)
+    song_artist = models.CharField(max_length=255)
+    song_album = models.CharField(max_length=255)
+    song_album_art = models.CharField(max_length=255)
+    song_preview_url = models.CharField(max_length=255)
+    comment = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

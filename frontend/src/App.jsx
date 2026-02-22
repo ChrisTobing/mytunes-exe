@@ -4,12 +4,12 @@ import "./App.css";
 import placeHolderAlbumArt from "./assets/placeholderMusic.jpg";
 import { searchToRows } from "./utils/functions";
 
-function App({ accessToken, user }) {
+function App({ accessToken, user, setUser }) {
   const [inputValue, setInputValue] = useState("");
   const [songsData, setSongsData] = useState([]);
   const [searchClicked, setSearchClicked] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState(null);
-
+  const [comment, setComment] = useState("");
   useEffect(() => {
     if (!searchClicked) return;
     const query = inputValue.trim();
@@ -39,6 +39,7 @@ function App({ accessToken, user }) {
     track_artist,
     track_album,
     track_albumArt,
+    track_previewUrl,
   ) => {
     if (selectedTrack && selectedTrack.id === track_id) {
       setSelectedTrack(null);
@@ -49,9 +50,47 @@ function App({ accessToken, user }) {
         artist: track_artist,
         album: track_album,
         albumArt: track_albumArt,
+        previewUrl: track_previewUrl,
       });
     }
   };
+
+  async function handleSubmit() {
+    const response = await fetch("http://localhost:8000/api/add-entry/", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        song_id: selectedTrack.id,
+        song_name: selectedTrack.name,
+        song_artist: selectedTrack.artist,
+        song_album: selectedTrack.album,
+        song_album_art: selectedTrack.albumArt,
+        song_preview_url: selectedTrack.previewUrl,
+        comment: comment,
+      }),
+    })
+    if (response.ok) {
+      const data = await response.json();
+      const profileRes = await fetch("http://localhost:8000/api/profile/", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (profileRes.ok) {
+        const updatedProfile = await profileRes.json();
+        setUser(updatedProfile);
+        console.log(updatedProfile);
+      }
+      alert(data.message);
+      setComment("");
+      setSelectedTrack(null);
+    } else {
+      console.error("Error:", response.statusText);
+      alert(response.statusText);
+    }
+  };
+  
   return (
     <>
       <div className="window-container">
@@ -145,12 +184,12 @@ function App({ accessToken, user }) {
                 style={{ marginTop: "10px", width: "100%" }}
               >
                 <label htmlFor="text23">Comment:</label>
-                <textarea
+                <textarea value={comment} onChange={(e) => setComment(e.target.value)}
                   id="text23"
                   name="text23"
                   rows="4"
                   cols="50"
-                ></textarea>
+                />
               </div>
               <div
                 className="pos-button-container"
@@ -161,7 +200,7 @@ function App({ accessToken, user }) {
                   justifyContent: "center",
                 }}
               >
-                <button>Submit</button>
+                <button onClick={handleSubmit}>Submit</button>
               </div>
             </article>
           </div>
