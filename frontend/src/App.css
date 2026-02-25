@@ -6,8 +6,13 @@
   justify-content: center;
 }
 
+
 [role="tabpanel"] {
   padding-top: 16px;
+}
+
+[role="tabpanel"] h5:first-child {
+  margin-top: 0;
 }
 
 [role="tabpanel"] .field-row {

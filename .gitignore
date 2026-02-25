@@ -30,3 +30,6 @@ Desktop.ini
 .idea/
 .vscode/
 *.swp
+
+# Claude
+CLAUDE.md

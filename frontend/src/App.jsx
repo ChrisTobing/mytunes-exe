@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import "xp.css/dist/XP.css";
 import "./App.css";
-import placeHolderAlbumArt from "./assets/placeholderMusic.jpg";
-import { searchToRows } from "./utils/functions";
+import Feed from "./Feed";
+import EntryForm from "./EntryForm";
 
 function App({ accessToken, user, setUser }) {
   const [inputValue, setInputValue] = useState("");
@@ -10,6 +10,7 @@ function App({ accessToken, user, setUser }) {
   const [searchClicked, setSearchClicked] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [comment, setComment] = useState("");
+  const [hasPosted, setPosted] = useState(true);
   useEffect(() => {
     if (!searchClicked) return;
     const query = inputValue.trim();
@@ -71,7 +72,7 @@ function App({ accessToken, user, setUser }) {
         song_preview_url: selectedTrack.previewUrl,
         comment: comment,
       }),
-    })
+    });
     if (response.ok) {
       const data = await response.json();
       const profileRes = await fetch("http://localhost:8000/api/profile/", {
@@ -89,8 +90,8 @@ function App({ accessToken, user, setUser }) {
       console.error("Error:", response.statusText);
       alert(response.statusText);
     }
-  };
-  
+  }
+
   return (
     <>
       <div className="window-container">
@@ -104,7 +105,7 @@ function App({ accessToken, user, setUser }) {
             </div>
           </div>
           <div className="window-body">
-            <menu role="tablist">
+            <menu role="tablist" className="tablist">
               <button aria-selected="true" aria-controls="EntryForm">
                 Entry
               </button>
@@ -116,92 +117,21 @@ function App({ accessToken, user, setUser }) {
               </button>
             </menu>
             <article role="tabpanel" aria-labelledby="Welcome, {user.username}">
-              <h5>
-                You haven't entered a song today. Make an entry to see your
-                friends' entries!
-              </h5>
-              <div className="field-row">
-                <label htmlFor="text21">Search for:</label>
-                <input
-                  type="text"
-                  id="text21"
-                  name="text21"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+              {hasPosted ? (
+                <Feed />
+              ) : (
+                <EntryForm
+                  inputValue={inputValue}
+                  setInputValue={setInputValue}
+                  handleSearch={handleSearch}
+                  handleTrackClick={handleTrackClick}
+                  selectedTrack={selectedTrack}
+                  comment={comment}
+                  setComment={setComment}
+                  handleSubmit={handleSubmit}
+                  songsData={songsData}
                 />
-                <button onClick={handleSearch}>Find</button>
-              </div>
-              <div
-                className="sunken-panel"
-                style={{
-                  height: "150px",
-                  marginTop: "10px",
-                  overflowY: "scroll",
-                  background: "white",
-                }}
-              >
-                <table style={{ width: "100%" }}>
-                  <tbody>
-                    {searchToRows(songsData, handleTrackClick, selectedTrack)}
-                  </tbody>
-                </table>
-              </div>
-              <div className="selected">
-                <label htmlFor="text22">Selected:</label>
-                <div className="selected-content">
-                  <img
-                    src={
-                      selectedTrack
-                        ? selectedTrack.albumArt
-                        : placeHolderAlbumArt
-                    }
-                    alt="Sample Album Art"
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      border: "2px solid gray",
-                      borderStyle: "double",
-                    }}
-                  />
-                  <div className="selected-content-text">
-                    <p>
-                      {selectedTrack
-                        ? selectedTrack.artist + " - " + selectedTrack.name
-                        : "No song selected"}
-                    </p>
-                    <p>
-                      Album:{" "}
-                      {selectedTrack
-                        ? selectedTrack.album
-                        : "No album selected"}
-                    </p>
-                    <p>Date: {new Date().toLocaleDateString()}</p>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="field-row-stacked"
-                style={{ marginTop: "10px", width: "100%" }}
-              >
-                <label htmlFor="text23">Comment:</label>
-                <textarea value={comment} onChange={(e) => setComment(e.target.value)}
-                  id="text23"
-                  name="text23"
-                  rows="4"
-                  cols="50"
-                />
-              </div>
-              <div
-                className="pos-button-container"
-                style={{
-                  marginTop: "10px",
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                }}
-              >
-                <button onClick={handleSubmit}>Submit</button>
-              </div>
+              )}
             </article>
           </div>
         </div>

@@ -1,0 +1,156 @@
+.feed-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  min-width: 480px;
+}
+
+/* Header */
+.feed-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.feed-avatar {
+  width: 40px;
+  height: 40px;
+  border: 2px solid gray;
+  border-style: double;
+  object-fit: cover;
+}
+
+.feed-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.feed-posted-by {
+  font-size: .75rem;
+  font-weight: bold;
+  color: #003399;
+}
+
+.feed-divider {
+  margin: 0;
+  border: none;
+  border-top: 1px solid #999;
+}
+
+/* Navigation row */
+.feed-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.feed-nav-btn {
+  min-width: 40px;
+  min-height: 40px;
+  font-size: 1.25rem;
+  font-weight: bold;
+  padding: 4px 10px;
+}
+
+.feed-album-art-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.feed-album-art {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Song / Artist fields */
+.feed-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.feed-field-row {
+  display: flex;
+  align-items: center;
+}
+
+.feed-field-label {
+  min-width: 46px;
+  text-align: right;
+  font-size: 0.75rem;
+}
+
+.feed-field-input {
+  flex: 1;
+  background: #c8c8c8;
+  border: 1px solid #999;
+  padding: 2px 4px;
+  font-size: .75rem;
+  cursor: default;
+}
+
+/* Chatbox */
+.feed-chatbox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 120px;
+  overflow-y: auto;
+  padding: 6px 0px;
+  background: white;
+  box-sizing: border-box;
+}
+
+.chat-message {
+  display: flex;
+  gap: 6px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  padding: 4px 8px;
+}
+
+.chat-message--even {
+  background: #f0f0f0;
+}
+
+.chat-message--poster .chat-username {
+  color: #003399;
+}
+
+.chat-username {
+  font-weight: bold;
+  white-space: nowrap;
+  color: #555;
+}
+
+.chat-text {
+  word-break: break-word;
+}
+
+/* Input row */
+.feed-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.feed-like-btn {
+  white-space: nowrap;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+}
+
+.feed-comment-input {
+  flex: 1;
+  font-size: 0.8rem;
+  padding: 2px 4px;
+}
