@@ -3,20 +3,18 @@ import "xp.css/dist/XP.css";
 import "./Feed.css";
 import placeholderAlbumArt from "./assets/placeholderMusic.jpg";
 
-function Feed({ user }) {
-  const entry = {
-    username: "CoolFriend12",
-    song_name: "Wonderwall",
-    song_artist: "Oasis",
-    song_album_art: null,
-    comment: "This defines my entire Tuesday vibe...",
-    likes: 4,
-  };
-
+function Feed({ user, entry }) {
   const [comments, setComments] = useState([]);
   const [commentInput, setCommentInput] = useState("");
-  const [likes, setLikes] = useState(entry.likes);
+  const [likes, setLikes] = useState(0);
   const [liked, setLiked] = useState(false);
+
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 
   const handleSend = () => {
     const text = commentInput.trim();
@@ -34,17 +32,22 @@ function Feed({ user }) {
     setLikes(liked ? likes - 1 : likes + 1);
   };
 
+  if (!entry) return null;
+
   return (
     <div className="feed-container">
       {/* Navigation + Album Art */}
+      <span className="feed-date-header">{today}</span>
       <div className="feed-nav">
         <button className="feed-nav-btn">&lt;</button>
-        <div className="sunken-panel feed-album-art-panel">
-          <img
-            src={entry.song_album_art || placeholderAlbumArt}
-            alt="Album Art"
-            className="feed-album-art"
-          />
+        <div className="feed-album-art-wrapper">
+          <div className="sunken-panel feed-album-art-panel">
+            <img
+              src={entry.song_album_art || placeholderAlbumArt}
+              alt="Album Art"
+              className="feed-album-art"
+            />
+          </div>
         </div>
         <button className="feed-nav-btn">&gt;</button>
       </div>
@@ -55,7 +58,8 @@ function Feed({ user }) {
       <div className="feed-header">
         <img src={placeholderAlbumArt} alt="User avatar" className="feed-avatar" />
         <div className="feed-header-info">
-          <span className="feed-posted-by">@{entry.username}</span>
+          <span className="feed-posted-by">@{user?.username}</span>
+          <span className="feed-your-entry-badge">Your Entry</span>
         </div>
       </div>
 
@@ -75,7 +79,7 @@ function Feed({ user }) {
       <div className="sunken-panel feed-chatbox">
         {/* Poster's original comment */}
         <div className="chat-message chat-message--poster">
-          <span className="chat-username">@{entry.username}:</span>
+          <span className="chat-username">@{user?.username}:</span>
           <span className="chat-text">{entry.comment}</span>
         </div>
 

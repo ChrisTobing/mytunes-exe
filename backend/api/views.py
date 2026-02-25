@@ -1,10 +1,12 @@
 from django.shortcuts import render
+from django.contrib.auth.models import User
+from datetime import datetime
 
 import requests
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from .models import UserAuth, Entry
+from .models import UserAuth, Entry, Friend
 from rest_framework_simplejwt.tokens import RefreshToken
 
 @api_view(['GET'])
@@ -121,3 +123,88 @@ def add_entry(request):
         return Response({"message": "Entry added successfully", "entry": entry.id}, status=201)
     except Exception as e:
         return Response({"error": str(e)}, status=400)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def has_posted(request):
+    today = datetime.now().date()
+    user = request.user
+    entry = Entry.objects.filter(user=user, created_at__date=today).first()
+    if entry:
+        return Response({
+            "has_posted": True,
+            "entry": {
+                "song_name": entry.song_name,
+                "song_artist": entry.song_artist,
+                "song_album": entry.song_album,
+                "song_album_art": entry.song_album_art,
+                "song_preview_url": entry.song_preview_url,
+                "comment": entry.comment,
+                "created_at": entry.created_at,
+            }
+        }, status=200)
+    else:
+        return Response({"has_posted": False}, status=200)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_friends(request):
+    user = request.user
+    today = datetime.now().date()
+    user_posted_today = Entry.objects.filter(user=user, created_at__date=today).exists()
+    friendships = Friend.objects.filter(user=user).select_related('friend')
+    result = []
+    for f in friendships:
+        today_entry = None
+        if user_posted_today:
+            entry = Entry.objects.filter(user=f.friend, created_at__date=today).first()
+            if entry:
+                today_entry = {
+                    'song_name': entry.song_name,
+                    'song_artist': entry.song_artist,
+                }
+        result.append({
+            'id': f.id,
+            'friend_id': f.friend.id,
+            'friend_username': f.friend.username,
+            'today_entry': today_entry,
+        })
+    return Response(result, status=200)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_friend(request):
+    user = request.user
+    username = request.data.get('username')
+    if not username:
+        return Response({"error": "Username is required"}, status=400)
+    if username == user.username:
+        return Response({"error": "You cannot add yourself"}, status=400)
+    try:
+        friend_user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=404)
+    if Friend.objects.filter(user=user, friend=friend_user).exists():
+        return Response({"error": "Already friends"}, status=400)
+    friendship = Friend.objects.create(user=user, friend=friend_user)
+    return Response({
+        "message": f"Added {friend_user.username} as a friend",
+        "id": friendship.id,
+        "friend_id": friend_user.id,
+        "friend_username": friend_user.username,
+    }, status=201)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def remove_friend(request, friend_id):
+    user = request.user
+    try:
+        friendship = Friend.objects.get(id=friend_id, user=user)
+    except Friend.DoesNotExist:
+        return Response({"error": "Friend not found"}, status=404)
+    friendship.delete()
+    return Response({"message": "Friend removed"}, status=200)

@@ -3,6 +3,7 @@ import "xp.css/dist/XP.css";
 import "./App.css";
 import Feed from "./Feed";
 import EntryForm from "./EntryForm";
+import Friends from "./Friends";
 
 function App({ accessToken, user, setUser }) {
   const [inputValue, setInputValue] = useState("");
@@ -11,6 +12,8 @@ function App({ accessToken, user, setUser }) {
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [comment, setComment] = useState("");
   const [hasPosted, setPosted] = useState(true);
+  const [todayEntry, setTodayEntry] = useState(null);
+  const [activeTab, setActiveTab] = useState("entry");
   useEffect(() => {
     if (!searchClicked) return;
     const query = inputValue.trim();
@@ -29,6 +32,18 @@ function App({ accessToken, user, setUser }) {
       .catch((error) => console.error("Error:", error));
     setSearchClicked(false);
   }, [searchClicked, inputValue]);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/has-posted/", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setPosted(data.has_posted);
+        if (data.entry) setTodayEntry(data.entry);
+      })
+      .catch((error) => console.error("Error:", error));
+  }, [accessToken]);
 
   const handleSearch = () => {
     setSearchClicked(true);
@@ -84,6 +99,16 @@ function App({ accessToken, user, setUser }) {
         console.log(updatedProfile);
       }
       alert(data.message);
+      setTodayEntry({
+        song_name: selectedTrack.name,
+        song_artist: selectedTrack.artist,
+        song_album: selectedTrack.album,
+        song_album_art: selectedTrack.albumArt,
+        song_preview_url: selectedTrack.previewUrl,
+        comment: comment,
+        created_at: new Date().toISOString(),
+      });
+      setPosted(true);
       setComment("");
       setSelectedTrack(null);
     } else {
@@ -106,31 +131,49 @@ function App({ accessToken, user, setUser }) {
           </div>
           <div className="window-body">
             <menu role="tablist" className="tablist">
-              <button aria-selected="true" aria-controls="EntryForm">
+              <button
+                aria-selected={activeTab === "entry"}
+                aria-controls="EntryForm"
+                onClick={() => setActiveTab("entry")}
+              >
                 Entry
               </button>
-              <button aria-selected="false" aria-controls="Profile">
+              <button
+                aria-selected={activeTab === "profile"}
+                aria-controls="Profile"
+                onClick={() => setActiveTab("profile")}
+              >
                 Profile
               </button>
-              <button aria-selected="false" aria-controls="Friends">
+              <button
+                aria-selected={activeTab === "friends"}
+                aria-controls="Friends"
+                onClick={() => setActiveTab("friends")}
+              >
                 Friends
               </button>
             </menu>
-            <article role="tabpanel" aria-labelledby="Welcome, {user.username}">
-              {hasPosted ? (
-                <Feed />
-              ) : (
-                <EntryForm
-                  inputValue={inputValue}
-                  setInputValue={setInputValue}
-                  handleSearch={handleSearch}
-                  handleTrackClick={handleTrackClick}
-                  selectedTrack={selectedTrack}
-                  comment={comment}
-                  setComment={setComment}
-                  handleSubmit={handleSubmit}
-                  songsData={songsData}
-                />
+            <article role="tabpanel">
+              {activeTab === "entry" && (
+                hasPosted ? (
+                  <Feed user={user} entry={todayEntry} />
+                ) : (
+                  <EntryForm
+                    setPosted={setPosted}
+                    inputValue={inputValue}
+                    setInputValue={setInputValue}
+                    handleSearch={handleSearch}
+                    handleTrackClick={handleTrackClick}
+                    selectedTrack={selectedTrack}
+                    comment={comment}
+                    setComment={setComment}
+                    handleSubmit={handleSubmit}
+                    songsData={songsData}
+                  />
+                )
+              )}
+              {activeTab === "friends" && (
+                <Friends accessToken={accessToken} user={user} hasPosted={hasPosted} setHasPosted={setPosted} />
               )}
             </article>
           </div>

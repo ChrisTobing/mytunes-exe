@@ -1,7 +1,7 @@
 # backend/api/urls.py
 
 from django.urls import path
-from .views import get_songs, register, login, refresh_token, get_profile, add_entry
+from .views import get_songs, register, login, refresh_token, get_profile, add_entry, has_posted, get_friends, add_friend, remove_friend
 
 urlpatterns = [
     path('songs/', get_songs, name='get_songs'),
@@ -10,4 +10,8 @@ urlpatterns = [
     path('auth/refresh/', refresh_token, name='refresh_token'),
     path('profile/', get_profile, name='get_profile'),
     path('add-entry/', add_entry, name='add_entry'),
+    path('has-posted/', has_posted, name='has_posted'),
+    path('friends/', get_friends, name='get_friends'),
+    path('friends/add/', add_friend, name='add_friend'),
+    path('friends/<int:friend_id>/remove/', remove_friend, name='remove_friend'),
 ]

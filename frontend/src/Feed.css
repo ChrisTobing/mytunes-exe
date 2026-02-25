@@ -34,6 +34,15 @@
   color: #003399;
 }
 
+.feed-your-entry-badge {
+  font-size: 0.65rem;
+  color: #fff;
+  background: #003399;
+  padding: 1px 5px;
+  border: 1px solid #001f6e;
+  width: fit-content;
+}
+
 .feed-divider {
   margin: 0;
   border: none;
@@ -55,6 +64,21 @@
   font-size: 1.25rem;
   font-weight: bold;
   padding: 4px 10px;
+}
+
+.feed-album-art-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.feed-date-header {
+  font-size: 1.0rem;
+  font-weight: bold;
+  color: #003399;
+  letter-spacing: 0.03em;
+  text-align: center;
 }
 
 .feed-album-art-panel {
