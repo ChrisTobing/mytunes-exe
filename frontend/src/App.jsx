@@ -14,6 +14,8 @@ function App({ accessToken, user, setUser }) {
   const [hasPosted, setPosted] = useState(true);
   const [todayEntry, setTodayEntry] = useState(null);
   const [activeTab, setActiveTab] = useState("entry");
+  const [friendEntries, setFriendEntries] = useState([])
+
   useEffect(() => {
     if (!searchClicked) return;
     const query = inputValue.trim();
@@ -40,10 +42,21 @@ function App({ accessToken, user, setUser }) {
       .then((response) => response.json())
       .then((data) => {
         setPosted(data.has_posted);
-        if (data.entry) setTodayEntry(data.entry);
+        setTodayEntry(data.entry || null);
+        console.log(data);
       })
       .catch((error) => console.error("Error:", error));
   }, [accessToken]);
+
+  useEffect(() => {
+    if (!hasPosted) return;
+    fetch("http://localhost:8000/api/friends/", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+      .then((response) => response.json())
+      .then((data) => setFriendEntries(data))
+      .catch((error) => console.error("Error:", error));
+  }, [accessToken, hasPosted]);
 
   const handleSearch = () => {
     setSearchClicked(true);
@@ -100,6 +113,7 @@ function App({ accessToken, user, setUser }) {
       }
       alert(data.message);
       setTodayEntry({
+        username: user.username,
         song_name: selectedTrack.name,
         song_artist: selectedTrack.artist,
         song_album: selectedTrack.album,
@@ -156,7 +170,7 @@ function App({ accessToken, user, setUser }) {
             <article role="tabpanel">
               {activeTab === "entry" && (
                 hasPosted ? (
-                  <Feed user={user} entry={todayEntry} />
+                  <Feed user={user} entry={todayEntry} friendEntries={friendEntries} />
                 ) : (
                   <EntryForm
                     setPosted={setPosted}
@@ -173,7 +187,7 @@ function App({ accessToken, user, setUser }) {
                 )
               )}
               {activeTab === "friends" && (
-                <Friends accessToken={accessToken} user={user} hasPosted={hasPosted} setHasPosted={setPosted} />
+                <Friends accessToken={accessToken} user={user} hasPosted={hasPosted} setHasPosted={setPosted} friendEntries={friendEntries} />
               )}
             </article>
           </div>

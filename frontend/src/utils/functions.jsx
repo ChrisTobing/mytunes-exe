@@ -17,3 +17,11 @@ export const searchToRows = (songsList, handleTrackClick, selectedTrack) => {
         )
     })
 }
+
+export const combineFeed = (entry, friendEntries) => {
+    if (!entry) return [];
+    const friendFeedItems = friendEntries
+        .filter(f => f.today_entry)
+        .map(f => f.today_entry);
+    return [entry, ...friendFeedItems];
+}

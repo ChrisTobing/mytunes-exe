@@ -2,19 +2,15 @@ import { useState, useEffect } from "react";
 import "xp.css/dist/XP.css";
 import "./Friends.css";
 
-function Friends({ accessToken, user, hasPosted, setHasPosted }) {
-  const [friends, setFriends] = useState([]);
+function Friends({ accessToken, user, hasPosted, setHasPosted, friendEntries }) {
+  const [friends, setFriends] = useState(friendEntries);
   const [selected, setSelected] = useState(null);
   const [addInput, setAddInput] = useState("");
   const [addError, setAddError] = useState("");
+
   useEffect(() => {
-    fetch("http://localhost:8000/api/friends/", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-      .then((r) => r.json())
-      .then((data) => setFriends(data))
-      .catch(console.error);
-  }, [accessToken]);
+    setFriends(friendEntries);
+  }, [friendEntries]);
 
   const handleAdd = () => {
     const username = addInput.trim();
@@ -118,7 +114,7 @@ function Friends({ accessToken, user, hasPosted, setHasPosted }) {
               <span className="friends-status">
                 {f.today_entry
                   ? `— Listening to: ${f.today_entry.song_artist} - ${f.today_entry.song_name}`
-                  : "— ???"}
+                  : "— Hasn't posted today ... yet."}
               </span>
             </div>
           ))

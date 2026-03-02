@@ -132,9 +132,8 @@ def has_posted(request):
     user = request.user
     entry = Entry.objects.filter(user=user, created_at__date=today).first()
     if entry:
-        return Response({
-            "has_posted": True,
-            "entry": {
+        today_entry = {
+                "username": user.username,
                 "song_name": entry.song_name,
                 "song_artist": entry.song_artist,
                 "song_album": entry.song_album,
@@ -142,7 +141,10 @@ def has_posted(request):
                 "song_preview_url": entry.song_preview_url,
                 "comment": entry.comment,
                 "created_at": entry.created_at,
-            }
+        }
+        return Response({
+            "has_posted": True,
+            "entry": today_entry,
         }, status=200)
     else:
         return Response({"has_posted": False}, status=200)
@@ -157,13 +159,20 @@ def get_friends(request):
     friendships = Friend.objects.filter(user=user).select_related('friend')
     result = []
     for f in friendships:
+        print(f.friend.username)
         today_entry = None
         if user_posted_today:
             entry = Entry.objects.filter(user=f.friend, created_at__date=today).first()
             if entry:
                 today_entry = {
+                    'username': f.friend.username,
                     'song_name': entry.song_name,
                     'song_artist': entry.song_artist,
+                    'song_album': entry.song_album,
+                    'song_album_art': entry.song_album_art,
+                    'song_preview_url': entry.song_preview_url,
+                    'comment': entry.comment,
+                    'created_at': entry.created_at,
                 }
         result.append({
             'id': f.id,
