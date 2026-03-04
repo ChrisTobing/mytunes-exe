@@ -87,7 +87,7 @@ def get_profile(request):
     entries = Entry.objects.filter(user=user).order_by('-created_at').values(
         'id', 'song_id', 'song_name', 'song_artist',
         'song_album', 'song_album_art', 'song_preview_url',
-        'comment', 'created_at'
+        'comments', 'created_at'
     )
     return Response({
         "id": user.id,
@@ -106,7 +106,7 @@ def add_entry(request):
     song_album = request.data.get('song_album')
     song_album_art = request.data.get('song_album_art')
     song_preview_url = request.data.get('song_preview_url')
-    comment = request.data.get('comment')
+    comments = request.data.get('comments')
     if not all([song_id, song_name, song_artist, song_album, song_album_art]):
         return Response({"error": "Missing required song fields"}, status=400)
     try:
@@ -118,7 +118,7 @@ def add_entry(request):
             song_album=song_album,
             song_album_art=song_album_art,
             song_preview_url=song_preview_url or "",
-            comment=comment or "",
+            comments=comments or [],
         )
         return Response({"message": "Entry added successfully", "entry": entry.id}, status=201)
     except Exception as e:
@@ -133,13 +133,14 @@ def has_posted(request):
     entry = Entry.objects.filter(user=user, created_at__date=today).first()
     if entry:
         today_entry = {
+                "id": entry.id,
                 "username": user.username,
                 "song_name": entry.song_name,
                 "song_artist": entry.song_artist,
                 "song_album": entry.song_album,
                 "song_album_art": entry.song_album_art,
                 "song_preview_url": entry.song_preview_url,
-                "comment": entry.comment,
+                "comments": entry.comments,
                 "created_at": entry.created_at,
         }
         return Response({
@@ -165,13 +166,14 @@ def get_friends(request):
             entry = Entry.objects.filter(user=f.friend, created_at__date=today).first()
             if entry:
                 today_entry = {
+                    'id': entry.id,
                     'username': f.friend.username,
                     'song_name': entry.song_name,
                     'song_artist': entry.song_artist,
                     'song_album': entry.song_album,
                     'song_album_art': entry.song_album_art,
                     'song_preview_url': entry.song_preview_url,
-                    'comment': entry.comment,
+                    'comments': entry.comments,
                     'created_at': entry.created_at,
                 }
         result.append({
@@ -217,3 +219,23 @@ def remove_friend(request, friend_id):
         return Response({"error": "Friend not found"}, status=404)
     friendship.delete()
     return Response({"message": "Friend removed"}, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_comment(request):
+    user = request.user
+    entry_id = request.data.get('entry_id')
+    username = request.data.get('username')
+    text = request.data.get('text')
+    if not all([entry_id, text]):
+        return Response({"error": "Missing required fields"}, status=400)
+    try:
+        entry = Entry.objects.get(id=entry_id)
+    except Entry.DoesNotExist:
+        return Response({"error": "Entry not found"}, status=404)
+    entry.comments.append({
+        "username": username,
+        "text": text,
+    })
+    entry.save()
+    return Response({"message": "Comment added successfully", "comments": entry.comments}, status=201)
