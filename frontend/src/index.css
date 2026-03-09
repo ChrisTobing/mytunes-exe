@@ -1,0 +1,7 @@
+body {
+  /* Classic installation screen gradient */
+  background: linear-gradient(to bottom, #000080 0%, #3a6ea5 100%);
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+}

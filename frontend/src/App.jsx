@@ -5,6 +5,7 @@ import Feed from "./Feed";
 import EntryForm from "./EntryForm";
 import Friends from "./Friends";
 import Profile from "./Profile";
+import Taskbar from "./Taskbar";
 
 function App({ accessToken, user, setUser }) {
   const [inputValue, setInputValue] = useState("");
@@ -206,6 +207,7 @@ function App({ accessToken, user, setUser }) {
           </div>
         </div>
       </div>
+      <Taskbar />
     </>
   );
 }
