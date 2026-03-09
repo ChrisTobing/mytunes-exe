@@ -1,0 +1,56 @@
+.comment-item {
+  display: flex;
+  align-items: center;
+  font-family: Tahoma, "MS Sans Serif", sans-serif;
+  font-size: 11px;
+  padding: 2px 4px;
+  min-height: 20px;
+}
+
+.comment-author {
+  font-weight: bold;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.comment-text {
+  flex: 1;
+  word-break: break-word;
+}
+
+.comment-edit-input {
+  flex: 1;
+  font-family: Tahoma, "MS Sans Serif", sans-serif;
+  font-size: 11px;
+  padding: 1px 3px;
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-bottom: 2px solid #ffffff;
+  border-right: 2px solid #ffffff;
+  outline: none;
+  background: #ffffff;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  padding-left: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.comment-link {
+  color: #0000EE;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: Tahoma, "MS Sans Serif", sans-serif;
+  font-size: 11px;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.comment-link:hover {
+  text-decoration: underline;
+}

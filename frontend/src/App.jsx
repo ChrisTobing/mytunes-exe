@@ -10,7 +10,8 @@ function App({ accessToken, user, setUser }) {
   const [songsData, setSongsData] = useState([]);
   const [searchClicked, setSearchClicked] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState(null);
-  const [comment, setComment] = useState("");
+  const [currentComment, setCurrentComment] = useState("");
+  const [comments, setComments] = useState([]);
   const [hasPosted, setPosted] = useState(true);
   const [todayEntry, setTodayEntry] = useState(null);
   const [activeTab, setActiveTab] = useState("entry");
@@ -85,6 +86,12 @@ function App({ accessToken, user, setUser }) {
   };
 
   async function handleSubmit() {
+    if (currentComment.length === 0) {
+      alert("Please add at least one comment");
+      return;
+    }
+    const newComments = [...comments, { username: user.username, text: currentComment }];
+    setComments(newComments);
     const response = await fetch("http://localhost:8000/api/add-entry/", {
       method: "POST",
       headers: {
@@ -98,7 +105,7 @@ function App({ accessToken, user, setUser }) {
         song_album: selectedTrack.album,
         song_album_art: selectedTrack.albumArt,
         song_preview_url: selectedTrack.previewUrl,
-        comment: comment,
+        comments: newComments,
       }),
     });
     if (response.ok) {
@@ -113,18 +120,20 @@ function App({ accessToken, user, setUser }) {
       }
       alert(data.message);
       setTodayEntry({
+        id: data.entry,
         username: user.username,
         song_name: selectedTrack.name,
         song_artist: selectedTrack.artist,
         song_album: selectedTrack.album,
         song_album_art: selectedTrack.albumArt,
         song_preview_url: selectedTrack.previewUrl,
-        comment: comment,
+        comments: newComments,
         created_at: new Date().toISOString(),
       });
       setPosted(true);
-      setComment("");
+      setCurrentComment("");
       setSelectedTrack(null);
+      console.log(todayEntry);
     } else {
       console.error("Error:", response.statusText);
       alert(response.statusText);
@@ -170,7 +179,7 @@ function App({ accessToken, user, setUser }) {
             <article role="tabpanel">
               {activeTab === "entry" && (
                 hasPosted ? (
-                  <Feed user={user} entry={todayEntry} friendEntries={friendEntries} />
+                  <Feed user={user} entry={todayEntry} friendEntries={friendEntries} accessToken={accessToken} />
                 ) : (
                   <EntryForm
                     setPosted={setPosted}
@@ -179,15 +188,15 @@ function App({ accessToken, user, setUser }) {
                     handleSearch={handleSearch}
                     handleTrackClick={handleTrackClick}
                     selectedTrack={selectedTrack}
-                    comment={comment}
-                    setComment={setComment}
+                    currentComment={currentComment}
+                    setCurrentComment={setCurrentComment}
                     handleSubmit={handleSubmit}
                     songsData={songsData}
                   />
                 )
               )}
               {activeTab === "friends" && (
-                <Friends accessToken={accessToken} user={user} hasPosted={hasPosted} setHasPosted={setPosted} friendEntries={friendEntries} />
+                <Friends accessToken={accessToken} hasPosted={hasPosted} friendEntries={friendEntries} setFriendEntries={setFriendEntries} />
               )}
             </article>
           </div>

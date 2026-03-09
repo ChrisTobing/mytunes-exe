@@ -1,4 +1,4 @@
-.friends-container {
+.friendEntries-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -7,40 +7,40 @@
 }
 
 /* Quick Add */
-.friends-add-section {
+.friendEntries-add-section {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.friends-add-label {
+.friendEntries-add-label {
   font-size: 0.75rem;
 }
 
-.friends-add-row {
+.friendEntries-add-row {
   display: flex;
   gap: 6px;
   align-items: center;
 }
 
-.friends-add-input {
+.friendEntries-add-input {
   flex: 1;
   font-size: 0.75rem;
 }
 
-.friends-add-error {
+.friendEntries-add-error {
   font-size: 0.7rem;
   color: #cc0000;
 }
 
 /* List heading */
-.friends-list-heading {
+.friendEntries-list-heading {
   font-size: 0.75rem;
   font-weight: bold;
 }
 
 /* List box */
-.friends-listbox {
+.friendEntries-listbox {
   background: white;
   height: 200px;
   overflow-y: auto;
@@ -49,14 +49,14 @@
   flex-direction: column;
 }
 
-.friends-empty {
+.friendEntries-empty {
   font-size: 0.75rem;
   color: #555;
   padding: 8px;
 }
 
 /* Rows */
-.friends-row {
+.friendEntries-row {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -69,17 +69,17 @@
   text-overflow: ellipsis;
 }
 
-.friends-row:hover:not(.friends-row--selected) {
+.friendEntries-row:hover:not(.friendEntries-row--selected) {
   background: #e0e0e0;
 }
 
-.friends-row--selected {
+.friendEntries-row--selected {
   background: #000080;
   color: white;
 }
 
 /* Avatar placeholder */
-.friends-avatar {
+.friendEntries-avatar {
   display: inline-block;
   width: 20px;
   height: 20px;
@@ -88,12 +88,12 @@
   flex-shrink: 0;
 }
 
-.friends-username {
+.friendEntries-username {
   font-weight: bold;
   flex-shrink: 0;
 }
 
-.friends-status {
+.friendEntries-status {
   color: inherit;
   opacity: 0.85;
   overflow: hidden;
@@ -101,16 +101,16 @@
 }
 
 /* Selected label */
-.friends-selected-label {
+.friendEntries-selected-label {
   font-size: 0.75rem;
 }
 
-.friends-none {
+.friendEntries-none {
   color: #555;
 }
 
 /* Action buttons */
-.friends-actions {
+.friendEntries-actions {
   display: flex;
   gap: 8px;
 }

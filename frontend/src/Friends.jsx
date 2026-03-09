@@ -1,16 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "xp.css/dist/XP.css";
 import "./Friends.css";
 
-function Friends({ accessToken, user, hasPosted, setHasPosted, friendEntries }) {
-  const [friends, setFriends] = useState(friendEntries);
+function Friends({ accessToken, hasPosted, friendEntries, setFriendEntries }) {
   const [selected, setSelected] = useState(null);
   const [addInput, setAddInput] = useState("");
   const [addError, setAddError] = useState("");
-
-  useEffect(() => {
-    setFriends(friendEntries);
-  }, [friendEntries]);
 
   const handleAdd = () => {
     const username = addInput.trim();
@@ -27,13 +22,13 @@ function Friends({ accessToken, user, hasPosted, setHasPosted, friendEntries }) 
       .then((r) => r.json())
       .then((data) => {
         if (data.id) {
-          setFriends((prev) => [
+          setFriendEntries((prev) => [
             ...prev,
             {
               id: data.id,
               friend_id: data.friend_id,
               friend_username: data.friend_username,
-              today_entry: null,
+              today_entry: data.today_entry,
             },
           ]);
           setAddInput("");
@@ -51,7 +46,7 @@ function Friends({ accessToken, user, hasPosted, setHasPosted, friendEntries }) 
       headers: { Authorization: `Bearer ${accessToken}` },
     })
       .then(() => {
-        setFriends((prev) => prev.filter((f) => f.id !== selected.id));
+        setFriendEntries((prev) => prev.filter((f) => f.id !== selected.id));
         setSelected(null);
       })
       .catch(console.error);
@@ -62,14 +57,14 @@ function Friends({ accessToken, user, hasPosted, setHasPosted, friendEntries }) 
   };
 
   return (
-    <div className="friends-container">
+    <div className="friendEntries-container">
       {/* Quick Add */}
-      <div className="friends-add-section">
-        <label className="friends-add-label">Quick Add Friend:</label>
-        <div className="friends-add-row">
+      <div className="friendEntries-add-section">
+        <label className="friendEntries-add-label">Quick Add Friend:</label>
+        <div className="friendEntries-add-row">
           <input
             type="text"
-            className="friends-add-input"
+            className="friendEntries-add-input"
             placeholder="Type a username..."
             value={addInput}
             onChange={(e) => {
@@ -80,38 +75,38 @@ function Friends({ accessToken, user, hasPosted, setHasPosted, friendEntries }) 
           />
           <button onClick={handleAdd}>+ Add Contact</button>
         </div>
-        {addError && <span className="friends-add-error">{addError}</span>}
+        {addError && <span className="friendEntries-add-error">{addError}</span>}
       </div>
 
       {/* Haven't Posted Today */}
       {!hasPosted && (
       <div className="post-disclaimer">
         <p>
-          You haven't posted a song today. Make an entry to see your friends'
+          You haven't posted a song today. Make an entry to see your friendEntries'
             entries!
           </p>
         </div>
       )}
 
       {/* List heading */}
-      <div className="friends-list-heading">
-        My Friends ({friends.length})
+      <div className="friendEntries-list-heading">
+        My Friends ({friendEntries.length})
       </div>
 
       {/* List box */}
-      <div className="sunken-panel friends-listbox">
-        {friends.length === 0 ? (
-          <div className="friends-empty">No friends added yet.</div>
+      <div className="sunken-panel friendEntries-listbox">
+        {friendEntries.length === 0 ? (
+          <div className="friendEntries-empty">No friendEntries added yet.</div>
         ) : (
-          friends.map((f) => (
+          friendEntries.map((f) => (
             <div
               key={f.id}
-              className={`friends-row${selected?.id === f.id ? " friends-row--selected" : ""}`}
+              className={`friendEntries-row${selected?.id === f.id ? " friendEntries-row--selected" : ""}`}
               onClick={() => handleRowClick(f)}
             >
-              <span className="friends-avatar" />
-              <span className="friends-username">@{f.friend_username}</span>
-              <span className="friends-status">
+              <span className="friendEntries-avatar" />
+              <span className="friendEntries-username">@{f.friend_username}</span>
+              <span className="friendEntries-status">
                 {f.today_entry
                   ? `— Listening to: ${f.today_entry.song_artist} - ${f.today_entry.song_name}`
                   : "— Hasn't posted today ... yet."}
@@ -122,17 +117,17 @@ function Friends({ accessToken, user, hasPosted, setHasPosted, friendEntries }) 
       </div>
 
       {/* Selected label */}
-      <div className="friends-selected-label">
+      <div className="friendEntries-selected-label">
         Selected:{" "}
         {selected ? (
           <strong>@{selected.friend_username}</strong>
         ) : (
-          <span className="friends-none">(none)</span>
+          <span className="friendEntries-none">(none)</span>
         )}
       </div>
 
       {/* Action buttons */}
-      <div className="friends-actions">
+      <div className="friendEntries-actions">
         <button disabled={!selected}>View Profile</button>
         <button disabled={!selected} onClick={handleRemove}>
           Remove Friend

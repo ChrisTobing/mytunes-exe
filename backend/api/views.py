@@ -201,11 +201,27 @@ def add_friend(request):
     if Friend.objects.filter(user=user, friend=friend_user).exists():
         return Response({"error": "Already friends"}, status=400)
     friendship = Friend.objects.create(user=user, friend=friend_user)
+    today = datetime.now().date()
+    entry = Entry.objects.filter(user=friend_user, created_at__date=today).first()
+    today_entry = None
+    if entry:
+        today_entry = {
+            "id": entry.id,
+            "username": friend_user.username,
+            "song_name": entry.song_name,
+            "song_artist": entry.song_artist,
+            "song_album": entry.song_album,
+            "song_album_art": entry.song_album_art,
+            "song_preview_url": entry.song_preview_url,
+            "comments": entry.comments,
+            "created_at": entry.created_at,
+        }
     return Response({
         "message": f"Added {friend_user.username} as a friend",
         "id": friendship.id,
         "friend_id": friend_user.id,
         "friend_username": friend_user.username,
+        "today_entry": today_entry,
     }, status=201)
 
 
@@ -223,7 +239,6 @@ def remove_friend(request, friend_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_comment(request):
-    user = request.user
     entry_id = request.data.get('entry_id')
     username = request.data.get('username')
     text = request.data.get('text')
@@ -239,3 +254,42 @@ def add_comment(request):
     })
     entry.save()
     return Response({"message": "Comment added successfully", "comments": entry.comments}, status=201)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_comment(request):
+    user = request.user
+    entry_id = request.data.get('entry_id')
+    comment_index = request.data.get('comment_index')
+    text = request.data.get('text')
+
+    # Validate input
+    if not all([entry_id, comment_index is not None, text]):
+        return Response({"error": "Missing required fields"}, status=400)
+    try:
+        entry = Entry.objects.get(id=entry_id)
+    except Entry.DoesNotExist:
+        return Response({"error": "Entry not found"}, status=404)
+    if comment_index < 0 or comment_index >= len(entry.comments):
+        return Response({"error": "Invalid comment index"}, status=400)
+    
+    entry.comments[comment_index]['text'] = text
+    entry.save()
+    return Response({"message": "Comment updated successfully", "comments": entry.comments}, status=200)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_comment(request, entry_id, comment_index):
+    user = request.user
+    try:
+        entry = Entry.objects.get(id=entry_id)
+    except Entry.DoesNotExist:
+        return Response({"error": "Entry not found"}, status=404)
+    if comment_index < 0 or comment_index >= len(entry.comments):
+        return Response({"error": "Invalid comment index"}, status=400)
+    if entry.comments[comment_index].get('username') != user.username:
+        return Response({"error": "You can only delete your own comments"}, status=403)
+    entry.comments.pop(comment_index)
+    entry.save()
+    return Response({"message": "Comment deleted successfully", "comments": entry.comments}, status=200)

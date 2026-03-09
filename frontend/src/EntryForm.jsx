@@ -10,8 +10,8 @@ function EntryForm({
   handleSearch,
   handleTrackClick,
   selectedTrack,
-  comment,
-  setComment,
+  currentComment,
+  setCurrentComment,
   handleSubmit,
   songsData,
 }) {
@@ -79,8 +79,8 @@ function EntryForm({
       >
         <label htmlFor="text23">Comment:</label>
         <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
+          value={currentComment}
+          onChange={(e) => setCurrentComment(e.target.value)}
           id="text23"
           name="text23"
           rows="4"
