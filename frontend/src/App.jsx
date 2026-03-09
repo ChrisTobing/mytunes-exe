@@ -4,6 +4,7 @@ import "./App.css";
 import Feed from "./Feed";
 import EntryForm from "./EntryForm";
 import Friends from "./Friends";
+import Profile from "./Profile";
 
 function App({ accessToken, user, setUser }) {
   const [inputValue, setInputValue] = useState("");
@@ -194,6 +195,9 @@ function App({ accessToken, user, setUser }) {
                     songsData={songsData}
                   />
                 )
+              )}
+              {activeTab === "profile" && (
+                <Profile user={user} />
               )}
               {activeTab === "friends" && (
                 <Friends accessToken={accessToken} hasPosted={hasPosted} friendEntries={friendEntries} setFriendEntries={setFriendEntries} />

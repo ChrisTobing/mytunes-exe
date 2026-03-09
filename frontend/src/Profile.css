@@ -1,0 +1,147 @@
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+  min-width: 360px;
+}
+
+/* Fieldsets */
+.profile-fieldset {
+  padding: 6px 10px 10px;
+  margin: 0;
+}
+
+.profile-fieldset legend {
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0 4px;
+}
+
+/* Personal Information */
+.profile-personal-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+
+.profile-avatar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.profile-avatar-wrapper {
+  padding: 2px;
+  display: inline-flex;
+}
+
+.profile-avatar {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-btn-full {
+  width: 100%;
+}
+
+.profile-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.profile-label {
+  font-size: 0.75rem;
+}
+
+.profile-input {
+  font-size: 0.75rem;
+  background: #c8c8c8;
+  cursor: default;
+  padding: 2px 4px;
+}
+
+/* Today's Tape */
+.profile-tape-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 4px;
+  flex-wrap: wrap;
+}
+
+.profile-tape-label {
+  font-size: 0.75rem;
+}
+
+.profile-delete-entry-btn {
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+/* Listening Statistics */
+.profile-stats-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding-top: 4px;
+}
+
+.profile-piechart-placeholder {
+  width: 90px;
+  height: 90px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+}
+
+.profile-piechart-inner {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #003399 0% 45%,
+    #cc3300 45% 75%,
+    #669900 75% 100%
+  );
+}
+
+.profile-genres-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-genres-heading {
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.profile-genres-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+
+/* Danger zone */
+.profile-danger-row {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 2px;
+}
+
+.profile-delete-account-btn {
+  font-size: 0.7rem;
+  color: #800000;
+}
