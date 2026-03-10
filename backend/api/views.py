@@ -107,6 +107,7 @@ def add_entry(request):
     song_album = request.data.get('song_album')
     song_album_art = request.data.get('song_album_art')
     song_preview_url = request.data.get('song_preview_url')
+    song_genre = request.data.get('song_genre', '')
     comments = request.data.get('comments')
     if not all([song_id, song_name, song_artist, song_album, song_album_art]):
         return Response({"error": "Missing required song fields"}, status=400)
@@ -119,6 +120,7 @@ def add_entry(request):
             song_album=song_album,
             song_album_art=song_album_art,
             song_preview_url=song_preview_url or "",
+            song_genre=song_genre,
             comments=comments or [],
         )
         return Response({"message": "Entry added successfully", "entry": entry.id}, status=201)
@@ -307,3 +309,24 @@ def update_username(request):
     user.username = new_username
     user.save()
     return Response({"message": "Username updated successfully", "username": user.username}, status=200)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_account(request):
+    user = request.user
+    user.delete()
+    response = Response({"message": "Account deleted successfully"}, status=200)
+    response.delete_cookie(key="refresh_token")
+    return response
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_today_entry(request):
+    user = request.user
+    today = datetime.now().date()
+    entry = Entry.objects.filter(user=user, created_at__date=today).first()
+    if not entry:
+        return Response({"error": "No entry found for today"}, status=404)
+    entry.delete()
+    return Response({"message": "Today's entry deleted successfully"}, status=200)

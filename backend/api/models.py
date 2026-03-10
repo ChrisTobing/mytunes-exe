@@ -60,6 +60,7 @@ class Entry(models.Model):
     song_album = models.CharField(max_length=255)
     song_album_art = models.CharField(max_length=255)
     song_preview_url = models.CharField(max_length=255)
+    song_genre = models.CharField(max_length=255, blank=True, default="")
     comments = models.JSONField(default=list)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

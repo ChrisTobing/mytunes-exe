@@ -7,7 +7,7 @@ import Friends from "./Friends";
 import Profile from "./Profile";
 import Taskbar from "./Taskbar";
 
-function App({ accessToken, user, setUser }) {
+function App({ accessToken, setAccessToken, user, setUser }) {
   const [inputValue, setInputValue] = useState("");
   const [songsData, setSongsData] = useState([]);
   const [searchClicked, setSearchClicked] = useState(false);
@@ -17,7 +17,7 @@ function App({ accessToken, user, setUser }) {
   const [hasPosted, setPosted] = useState(true);
   const [todayEntry, setTodayEntry] = useState(null);
   const [activeTab, setActiveTab] = useState("entry");
-  const [friendEntries, setFriendEntries] = useState([])
+  const [friendEntries, setFriendEntries] = useState([]);
 
   useEffect(() => {
     if (!searchClicked) return;
@@ -72,6 +72,7 @@ function App({ accessToken, user, setUser }) {
     track_album,
     track_albumArt,
     track_previewUrl,
+    track_genre,
   ) => {
     if (selectedTrack && selectedTrack.id === track_id) {
       setSelectedTrack(null);
@@ -83,6 +84,7 @@ function App({ accessToken, user, setUser }) {
         album: track_album,
         albumArt: track_albumArt,
         previewUrl: track_previewUrl,
+        genre: track_genre,
       });
     }
   };
@@ -92,7 +94,10 @@ function App({ accessToken, user, setUser }) {
       alert("Please add at least one comment");
       return;
     }
-    const newComments = [...comments, { username: user.username, text: currentComment }];
+    const newComments = [
+      ...comments,
+      { username: user.username, text: currentComment },
+    ];
     setComments(newComments);
     const response = await fetch("http://localhost:8000/api/add-entry/", {
       method: "POST",
@@ -107,6 +112,7 @@ function App({ accessToken, user, setUser }) {
         song_album: selectedTrack.album,
         song_album_art: selectedTrack.albumArt,
         song_preview_url: selectedTrack.previewUrl,
+        song_genre: selectedTrack.genre || "",
         comments: newComments,
       }),
     });
@@ -134,6 +140,7 @@ function App({ accessToken, user, setUser }) {
       });
       setPosted(true);
       setCurrentComment("");
+      setComments([]);
       setSelectedTrack(null);
       console.log(todayEntry);
     } else {
@@ -179,9 +186,14 @@ function App({ accessToken, user, setUser }) {
               </button>
             </menu>
             <article role="tabpanel">
-              {activeTab === "entry" && (
-                hasPosted ? (
-                  <Feed user={user} entry={todayEntry} friendEntries={friendEntries} accessToken={accessToken} />
+              {activeTab === "entry" &&
+                (hasPosted ? (
+                  <Feed
+                    user={user}
+                    entry={todayEntry}
+                    friendEntries={friendEntries}
+                    accessToken={accessToken}
+                  />
                 ) : (
                   <EntryForm
                     setPosted={setPosted}
@@ -195,13 +207,25 @@ function App({ accessToken, user, setUser }) {
                     handleSubmit={handleSubmit}
                     songsData={songsData}
                   />
-                )
-              )}
+                ))}
               {activeTab === "profile" && (
-                <Profile user={user} accessToken={accessToken} setUser={setUser} />
+                <Profile
+                  user={user}
+                  accessToken={accessToken}
+                  setUser={setUser}
+                  setAccessToken={setAccessToken}
+                  todayEntry={todayEntry}
+                  setTodayEntry={setTodayEntry}
+                  setPosted={setPosted}
+                />
               )}
               {activeTab === "friends" && (
-                <Friends accessToken={accessToken} hasPosted={hasPosted} friendEntries={friendEntries} setFriendEntries={setFriendEntries} />
+                <Friends
+                  accessToken={accessToken}
+                  hasPosted={hasPosted}
+                  friendEntries={friendEntries}
+                  setFriendEntries={setFriendEntries}
+                />
               )}
             </article>
           </div>

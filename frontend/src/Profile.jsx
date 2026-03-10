@@ -2,10 +2,13 @@ import "xp.css/dist/XP.css";
 import "./Profile.css";
 import placeholderAlbumArt from "./assets/placeholderMusic.jpg";
 import { useEffect, useState } from "react";
+import ConfirmModal from "./ConfirmModal";
 
-function Profile({ user, accessToken, setUser }) {
+function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTodayEntry, setPosted }) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(user?.username ?? "username");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteEntryModal, setShowDeleteEntryModal] = useState(false);
 
   function handleUpdateName() {
     setIsEditingName(true);
@@ -31,9 +34,40 @@ function Profile({ user, accessToken, setUser }) {
     setIsEditingName(false);
   }
 
+  async function handleDeleteEntry() {
+    const response = await fetch("http://localhost:8000/api/delete-entry/", {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (response.ok) {
+      setTodayEntry(null);
+      setPosted(false);
+      alert("Today's entry deleted successfully.");
+    }
+      else {
+      alert("Failed to delete today's entry. Please try again.");
+    }
+    setShowDeleteEntryModal(false);
+  }
+
+  async function handleDeleteAccount() {
+    const response = await fetch("http://localhost:8000/api/delete-account/", {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (response.ok) {
+      setAccessToken(null);
+      setUser(null);
+    } else {
+      alert("Failed to delete account. Please try again.");
+    }
+    setShowDeleteModal(false);
+  }
+
   useEffect(() => {
     setNameInput(user?.username ?? "username");
   }, [user]);
+  
 
   return (
     <div className="profile-container">
@@ -85,9 +119,9 @@ function Profile({ user, accessToken, setUser }) {
         <legend>Today's Tape</legend>
         <div className="profile-tape-row">
           <span className="profile-tape-label">
-            Currently Playing: <strong>Artist Name - Song Title</strong>
+            Currently Playing: <strong>{todayEntry?.song_name} - {todayEntry?.song_artist}</strong>
           </span>
-          <button className="profile-delete-entry-btn" disabled>
+          <button className="profile-delete-entry-btn" disabled={!todayEntry} onClick={() => setShowDeleteEntryModal(true)}>
             ✕ Delete Today's Entry
           </button>
         </div>
@@ -115,10 +149,31 @@ function Profile({ user, accessToken, setUser }) {
 
       {/* Danger Zone */}
       <div className="profile-danger-row">
-        <button className="profile-delete-account-btn" disabled>
+        <button
+          className="profile-delete-account-btn"
+          onClick={() => setShowDeleteModal(true)}
+        >
           ⚠ Delete Account...
         </button>
       </div>
+
+      {showDeleteModal && (
+        <ConfirmModal
+          title="Delete Account"
+          message={`Are you sure you want to permanently delete @${user?.username}'s account? This cannot be undone.`}
+          onConfirm={handleDeleteAccount}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
+
+      {showDeleteEntryModal && (
+        <ConfirmModal
+          title="Delete Today's Entry"
+          message={`Are you sure you want to delete today's entry? This cannot be undone.`}
+          onConfirm={handleDeleteEntry}
+          onCancel={() => setShowDeleteEntryModal(false)}
+        />
+      )}
     </div>
   );
 }
