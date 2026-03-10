@@ -29,7 +29,8 @@ def get_songs(request):
                 'artist': item['artistName'],
                 'album': item['collectionName'],
                 'albumArt': item['artworkUrl60'],
-                'previewUrl': item['previewUrl']
+                'previewUrl': item['previewUrl'],
+                'primaryGenreName': item['primaryGenreName'],
             })
         print(clean_data)
         return Response(clean_data)
@@ -293,3 +294,16 @@ def delete_comment(request, entry_id, comment_index):
     entry.comments.pop(comment_index)
     entry.save()
     return Response({"message": "Comment deleted successfully", "comments": entry.comments}, status=200)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_username(request):
+    user = request.user
+    new_username = request.data.get('new_username')
+    if not new_username:
+        return Response({"error": "New username is required"}, status=400)
+    if User.objects.filter(username=new_username).exists():
+        return Response({"error": "Username already exists"}, status=400)
+    user.username = new_username
+    user.save()
+    return Response({"message": "Username updated successfully", "username": user.username}, status=200)

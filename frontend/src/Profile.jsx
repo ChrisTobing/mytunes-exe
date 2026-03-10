@@ -1,11 +1,42 @@
 import "xp.css/dist/XP.css";
 import "./Profile.css";
 import placeholderAlbumArt from "./assets/placeholderMusic.jpg";
+import { useEffect, useState } from "react";
 
-function Profile({ user }) {
+function Profile({ user, accessToken, setUser }) {
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(user?.username ?? "username");
+
+  function handleUpdateName() {
+    setIsEditingName(true);
+  }
+  async function handleSave() {
+    // Api call
+    console.log("Saving new username:", nameInput);
+    const response = await fetch("http://localhost:8000/api/update-username/", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ new_username: nameInput.trim() }),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setUser((prev) => ({ ...prev, username: data.username }));
+    } else {
+      const errorData = await response.json();
+      alert(errorData.error || "Failed to update username");
+    }
+    setIsEditingName(false);
+  }
+
+  useEffect(() => {
+    setNameInput(user?.username ?? "username");
+  }, [user]);
+
   return (
     <div className="profile-container">
-
       {/* Personal Information */}
       <fieldset className="profile-fieldset">
         <legend>Personal Information</legend>
@@ -24,13 +55,27 @@ function Profile({ user }) {
           </div>
           <div className="profile-info-col">
             <label className="profile-label">Display Name:</label>
-            <input
-              type="text"
-              className="profile-input"
-              readOnly
-              value={`@${user?.username ?? "username"}`}
-            />
-            <button disabled>Update Name</button>
+            {isEditingName ? (
+              <>
+                <input
+                  type="text"
+                  className="profile-input"
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                />
+                <button onClick={handleSave}>Save</button>
+              </>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  className="profile-input"
+                  value={`@${user?.username ?? "username"}`}
+                  readOnly
+                />
+                <button onClick={handleUpdateName}>Update Name</button>
+              </>
+            )}
           </div>
         </div>
       </fieldset>
@@ -40,8 +85,7 @@ function Profile({ user }) {
         <legend>Today's Tape</legend>
         <div className="profile-tape-row">
           <span className="profile-tape-label">
-            Currently Playing:{" "}
-            <strong>Artist Name - Song Title</strong>
+            Currently Playing: <strong>Artist Name - Song Title</strong>
           </span>
           <button className="profile-delete-entry-btn" disabled>
             ✕ Delete Today's Entry
@@ -57,7 +101,9 @@ function Profile({ user }) {
             <div className="profile-piechart-inner" />
           </div>
           <div className="profile-genres-col">
-            <span className="profile-genres-heading">Top Genres This Month:</span>
+            <span className="profile-genres-heading">
+              Top Genres This Month:
+            </span>
             <ol className="profile-genres-list">
               <li>Hip-Hop/Rap (45%)</li>
               <li>Alternative Rock (30%)</li>
@@ -73,7 +119,6 @@ function Profile({ user }) {
           ⚠ Delete Account...
         </button>
       </div>
-
     </div>
   );
 }

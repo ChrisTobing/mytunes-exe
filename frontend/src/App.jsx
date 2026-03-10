@@ -198,7 +198,7 @@ function App({ accessToken, user, setUser }) {
                 )
               )}
               {activeTab === "profile" && (
-                <Profile user={user} />
+                <Profile user={user} accessToken={accessToken} setUser={setUser} />
               )}
               {activeTab === "friends" && (
                 <Friends accessToken={accessToken} hasPosted={hasPosted} friendEntries={friendEntries} setFriendEntries={setFriendEntries} />
