@@ -1,7 +1,7 @@
 import "xp.css/dist/XP.css";
 import "./Profile.css";
 import placeholderAlbumArt from "./assets/placeholderMusic.jpg";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ConfirmModal from "./ConfirmModal";
 
 function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTodayEntry, setPosted }) {
@@ -10,7 +10,28 @@ function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTo
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteEntryModal, setShowDeleteEntryModal] = useState(false);
   const [genreStats, setGenreStats] = useState({});
+  const fileInputRef = useRef(null);
   
+  async function handlePictureChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    // FormData is required for file uploads — unlike JSON, it encodes the file
+    // as multipart/form-data so Django's request.FILES can receive it.
+    const formData = new FormData();
+    formData.append("profile_picture", file);
+    const response = await fetch("http://localhost:8000/api/upload-profile-pic/", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: formData,
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setUser((prev) => ({ ...prev, profile_picture_url: data.profile_picture_url }));
+    } else {
+      alert("Failed to upload picture. Please try again.");
+    }
+  }
+
   function handleUpdateName() {
     setIsEditingName(true);
   }
@@ -97,12 +118,21 @@ function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTo
           <div className="profile-avatar-col">
             <div className="sunken-panel profile-avatar-wrapper">
               <img
-                src={placeholderAlbumArt}
+                src={user?.profile_picture_url || placeholderAlbumArt}
                 alt="Profile picture"
                 className="profile-avatar"
               />
             </div>
-            <button className="profile-btn-full" disabled>
+            {/* Hidden file input — the button below triggers it programmatically.
+                This avoids styling a native file input, which is notoriously hard. */}
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handlePictureChange}
+            />
+            <button className="profile-btn-full" onClick={() => fileInputRef.current.click()}>
               Change Picture...
             </button>
           </div>

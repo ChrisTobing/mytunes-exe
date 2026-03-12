@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "xp.css/dist/XP.css";
 import "./Friends.css";
+import placeholderAlbumArt from "./assets/placeholderMusic.jpg";
 
 function Friends({ accessToken, hasPosted, friendEntries, setFriendEntries }) {
   const [selected, setSelected] = useState(null);
@@ -104,7 +105,11 @@ function Friends({ accessToken, hasPosted, friendEntries, setFriendEntries }) {
               className={`friendEntries-row${selected?.id === f.id ? " friendEntries-row--selected" : ""}`}
               onClick={() => handleRowClick(f)}
             >
-              <span className="friendEntries-avatar" />
+              <img
+                src={f.profile_picture_url || placeholderAlbumArt}
+                alt=""
+                className="friendEntries-avatar"
+              />
               <span className="friendEntries-username">@{f.friend_username}</span>
               <span className="friendEntries-status">
                 {f.today_entry

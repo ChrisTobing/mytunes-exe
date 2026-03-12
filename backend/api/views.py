@@ -7,8 +7,35 @@ import requests
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from .models import UserAuth, Entry, Friend
+from .models import UserAuth, Entry, Friend, UserProfile
 from rest_framework_simplejwt.tokens import RefreshToken
+
+def get_profile_pic_url(user, request):
+    """
+    Return an absolute URL for a user's profile picture, or None if unset.
+    request.build_absolute_uri() converts the relative storage path
+    (e.g. /media/profile_pics/foo.jpg) into a full URL the frontend can use.
+    """
+    try:
+        if user.profile.profile_picture:
+            return request.build_absolute_uri(user.profile.profile_picture.url)
+    except Exception:
+        pass
+    return None
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def upload_profile_picture(request):
+    if 'profile_picture' not in request.FILES:
+        return Response({"error": "No file provided"}, status=400)
+    # get_or_create so the endpoint works even if UserProfile doesn't exist yet.
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    profile.profile_picture = request.FILES['profile_picture']
+    profile.save()
+    url = request.build_absolute_uri(profile.profile_picture.url)
+    return Response({"profile_picture_url": url}, status=200)
+
 
 @api_view(['GET'])
 def get_songs(request):
@@ -94,6 +121,7 @@ def get_profile(request):
     return Response({
         "id": user.id,
         "username": user.username,
+        "profile_picture_url": get_profile_pic_url(user, request),
         "entries": list(entries)
     }, status=200)
 
@@ -139,6 +167,7 @@ def has_posted(request):
         today_entry = {
                 "id": entry.id,
                 "username": user.username,
+                "profile_picture_url": get_profile_pic_url(user, request),
                 "song_name": entry.song_name,
                 "song_artist": entry.song_artist,
                 "song_album": entry.song_album,
@@ -172,6 +201,7 @@ def get_friends(request):
                 today_entry = {
                     'id': entry.id,
                     'username': f.friend.username,
+                    'profile_picture_url': get_profile_pic_url(f.friend, request),
                     'song_name': entry.song_name,
                     'song_artist': entry.song_artist,
                     'song_album': entry.song_album,
@@ -184,6 +214,7 @@ def get_friends(request):
             'id': f.id,
             'friend_id': f.friend.id,
             'friend_username': f.friend.username,
+            'profile_picture_url': get_profile_pic_url(f.friend, request),
             'today_entry': today_entry,
         })
     return Response(result, status=200)
@@ -212,6 +243,7 @@ def add_friend(request):
         today_entry = {
             "id": entry.id,
             "username": friend_user.username,
+            "profile_picture_url": get_profile_pic_url(friend_user, request),
             "song_name": entry.song_name,
             "song_artist": entry.song_artist,
             "song_album": entry.song_album,
@@ -225,6 +257,7 @@ def add_friend(request):
         "id": friendship.id,
         "friend_id": friend_user.id,
         "friend_username": friend_user.username,
+        "profile_picture_url": get_profile_pic_url(friend_user, request),
         "today_entry": today_entry,
     }, status=201)
 
@@ -344,8 +377,6 @@ def build_pie_svg(genre_list, size=120):
     - The SVG arc command needs a large-arc-flag: 1 if the slice spans more
       than 180° (>50%), 0 otherwise — this tells the renderer which of the
       two possible arcs to draw.
-    - Colors use HSL with the hue evenly distributed across 360° by index,
-      so any number of genres gets a distinct color automatically.
     """
     cx = cy = r = size / 2
     n = len(genre_list)

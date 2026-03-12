@@ -28,7 +28,14 @@ function Login({ setAccessToken, setUser }) {
     if (response.ok) {
       const data = await response.json();
       setAccessToken(data.access_token);
-      setUser({ id: data.user, username: username.trim() });
+      const profileRes = await fetch("http://localhost:8000/api/profile/", {
+        headers: { Authorization: `Bearer ${data.access_token}` },
+      });
+      if (profileRes.ok) {
+        setUser(await profileRes.json());
+      } else {
+        setUser({ id: data.user, username: username.trim() });
+      }
       navigate("/");
     } else {
       alert("Failed to login");

@@ -114,7 +114,11 @@ function Feed({ user, entry, friendEntries, accessToken }) {
       {/* Header */}
       <div className="feed-header">
         <img
-          src={placeholderAlbumArt}
+          src={
+            currentIndex === 0
+              ? user?.profile_picture_url || placeholderAlbumArt
+              : feedData[currentIndex].profile_picture_url || placeholderAlbumArt
+          }
           alt="User avatar"
           className="feed-avatar"
         />
