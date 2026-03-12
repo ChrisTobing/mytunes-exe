@@ -9,7 +9,8 @@ function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTo
   const [nameInput, setNameInput] = useState(user?.username ?? "username");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteEntryModal, setShowDeleteEntryModal] = useState(false);
-
+  const [genreStats, setGenreStats] = useState({});
+  
   function handleUpdateName() {
     setIsEditingName(true);
   }
@@ -67,7 +68,25 @@ function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTo
   useEffect(() => {
     setNameInput(user?.username ?? "username");
   }, [user]);
-  
+
+    useEffect(() => {
+      async function fetchGenreStats() {
+        const response = await fetch("http://localhost:8000/api/genre-stats/", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setGenreStats(data);
+        } else {
+          console.error("Failed to fetch genre stats");
+        }
+      }
+      fetchGenreStats();
+    }, [accessToken]);
+
+  const pieSrc = genreStats.svg
+    ? `data:image/svg+xml,${encodeURIComponent(genreStats.svg)}`
+    : null;
 
   return (
     <div className="profile-container">
@@ -132,16 +151,18 @@ function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTo
         <legend>Listening Statistics</legend>
         <div className="profile-stats-row">
           <div className="profile-piechart-placeholder sunken-panel">
-            <div className="profile-piechart-inner" />
+            {pieSrc && <img src={pieSrc} alt="Genre pie chart" className="profile-piechart-inner" />}
           </div>
           <div className="profile-genres-col">
             <span className="profile-genres-heading">
               Top Genres This Month:
             </span>
             <ol className="profile-genres-list">
-              <li>Hip-Hop/Rap (45%)</li>
-              <li>Alternative Rock (30%)</li>
-              <li>Pop (25%)</li>
+              {genreStats.genres?.map((item) => (
+                <li key={item.genre} style={{ color: item.color }}>
+                  {item.genre}: {item.percentage}%
+                </li>
+              ))}
             </ol>
           </div>
         </div>

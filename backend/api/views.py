@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from datetime import datetime
+import math
 
 import requests
 from rest_framework.response import Response
@@ -330,3 +331,96 @@ def delete_today_entry(request):
         return Response({"error": "No entry found for today"}, status=404)
     entry.delete()
     return Response({"message": "Today's entry deleted successfully"}, status=200)
+
+
+def build_pie_svg(genre_list, size=120):
+    """
+    Generate an SVG pie chart from a list of {genre, percentage} dicts.
+
+    How each slice is drawn:
+    - Convert the slice's percentage to an angle in radians.
+    - Use trig (cos/sin) to find the (x,y) point on the circle where that
+      slice ends, treating 12 o'clock (top) as 0° by starting at -π/2.
+    - The SVG arc command needs a large-arc-flag: 1 if the slice spans more
+      than 180° (>50%), 0 otherwise — this tells the renderer which of the
+      two possible arcs to draw.
+    - Colors use HSL with the hue evenly distributed across 360° by index,
+      so any number of genres gets a distinct color automatically.
+    """
+    cx = cy = r = size / 2
+    n = len(genre_list)
+    angle = -math.pi / 2  # start at top (12 o'clock)
+    paths = []
+
+    for i, item in enumerate(genre_list):
+        hue = round(i * 360 / n)
+        color = f"hsl({hue}, 60%, 40%)"
+        sweep = 2 * math.pi * item["percentage"] / 100
+
+        x1 = cx + r * math.cos(angle)
+        y1 = cy + r * math.sin(angle)
+        angle += sweep
+        x2 = cx + r * math.cos(angle)
+        y2 = cy + r * math.sin(angle)
+
+        large_arc = 1 if sweep > math.pi else 0
+        d = f"M {cx},{cy} L {x1:.3f},{y1:.3f} A {r},{r} 0 {large_arc},1 {x2:.3f},{y2:.3f} Z"
+        paths.append(f'<path d="{d}" fill="{color}" />')
+
+    inner = "\n  ".join(paths)
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 {size} {size}">'
+        f"\n  {inner}\n</svg>"
+    )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def genre_stats(request):
+    user = request.user
+
+    # Fetch every entry the user has ever posted, excluding blanks.
+    # values_list with flat=True returns a plain list of strings, not QuerySet dicts.
+    genres = Entry.objects.filter(
+        user=user
+    ).exclude(
+        song_genre=""
+    ).values_list('song_genre', flat=True)
+
+    total = len(genres)
+    if total == 0:
+        # Return a plain grey circle as a placeholder SVG so the frontend
+        # always has something to render without needing a conditional branch.
+        placeholder = (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">'
+            '<circle cx="60" cy="60" r="60" fill="#c0c0c0" />'
+            "</svg>"
+        )
+        return Response({"genres": [], "total": 0, "svg": placeholder}, status=200)
+    
+    counts = {}
+    for genre in genres:
+        counts[genre] = counts.get(genre, 0) + 1
+
+    # Build the response list: sort descending by count so the top genre comes first.
+    # Round percentage to one decimal place for clean display.
+    genre_list = sorted(
+        [
+            {
+                "genre": genre,
+                "count": count,
+                "percentage": round((count / total) * 100, 1),
+            }
+            for genre, count in counts.items()
+        ],
+        key=lambda x: x["count"],
+        reverse=True,
+    )
+
+    # Assign colors after sorting so index i matches the SVG slice order.
+    # Uses the same HSL formula as build_pie_svg.
+    n = len(genre_list)
+    for i, item in enumerate(genre_list):
+        item["color"] = f"hsl({round(i * 360 / n)}, 60%, 40%)"
+
+    return Response({"genres": genre_list, "total": total, "svg": build_pie_svg(genre_list)}, status=200)

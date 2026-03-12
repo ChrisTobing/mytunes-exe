@@ -138,7 +138,8 @@ function App({ accessToken, setAccessToken, user, setUser }) {
         comments: newComments,
         created_at: new Date().toISOString(),
       });
-      setPosted(true);
+      // TESTING ONLY: setPosted(true) removed so multiple entries can be submitted
+      // setPosted(true);
       setCurrentComment("");
       setComments([]);
       setSelectedTrack(null);

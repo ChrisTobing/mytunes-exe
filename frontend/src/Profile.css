@@ -110,11 +110,7 @@
   width: 70px;
   height: 70px;
   border-radius: 50%;
-  background: conic-gradient(
-    #003399 0% 45%,
-    #cc3300 45% 75%,
-    #669900 75% 100%
-  );
+  background: #c0c0c0;
 }
 
 .profile-genres-col {
