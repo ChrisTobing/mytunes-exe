@@ -4,11 +4,14 @@ from datetime import datetime
 import math
 
 import requests
+from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import UserAuth, Entry, Friend, UserProfile
 from rest_framework_simplejwt.tokens import RefreshToken
+from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
+from drf_spectacular.types import OpenApiTypes
 
 def get_profile_pic_url(user, request):
     """
@@ -24,6 +27,16 @@ def get_profile_pic_url(user, request):
     return None
 
 
+@extend_schema(
+    summary="Upload profile picture",
+    description="Replaces the authenticated user's profile picture. Send as multipart/form-data.",
+    request=inline_serializer("UploadProfilePictureRequest", fields={
+        "profile_picture": serializers.ImageField(),
+    }),
+    responses={200: inline_serializer("UploadProfilePictureResponse", fields={
+        "profile_picture_url": serializers.CharField(),
+    })},
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def upload_profile_picture(request):
@@ -37,6 +50,20 @@ def upload_profile_picture(request):
     return Response({"profile_picture_url": url}, status=200)
 
 
+@extend_schema(
+    summary="Search songs",
+    description="Queries the iTunes Search API for songs matching the given term. No authentication required.",
+    parameters=[OpenApiParameter(name="query", type=OpenApiTypes.STR, required=True, description="Search term")],
+    responses={200: inline_serializer("SongResult", fields={
+        "id": serializers.IntegerField(),
+        "name": serializers.CharField(),
+        "artist": serializers.CharField(),
+        "album": serializers.CharField(),
+        "albumArt": serializers.CharField(),
+        "previewUrl": serializers.CharField(),
+        "primaryGenreName": serializers.CharField(),
+    }, many=True)},
+)
 @api_view(['GET'])
 def get_songs(request):
 
@@ -66,6 +93,18 @@ def get_songs(request):
         return Response({"error": str(e)}, status=500)
 
 
+@extend_schema(
+    summary="Register",
+    description="Creates a new user account.",
+    request=inline_serializer("RegisterRequest", fields={
+        "username": serializers.CharField(),
+        "password": serializers.CharField(),
+    }),
+    responses={201: inline_serializer("RegisterResponse", fields={
+        "message": serializers.CharField(),
+        "user": serializers.IntegerField(),
+    })},
+)
 @api_view(['POST'])
 def register(request):
     username = request.data.get('username')
@@ -78,6 +117,19 @@ def register(request):
         return Response({"error": error}, status=400)
 
 
+@extend_schema(
+    summary="Login",
+    description="Authenticates a user. Returns an access token in the body and sets a `refresh_token` httpOnly cookie.",
+    request=inline_serializer("LoginRequest", fields={
+        "username": serializers.CharField(),
+        "password": serializers.CharField(),
+    }),
+    responses={200: inline_serializer("LoginResponse", fields={
+        "message": serializers.CharField(),
+        "user": serializers.IntegerField(),
+        "access_token": serializers.CharField(),
+    })},
+)
 @api_view(['POST'])
 def login(request):
     username = request.data.get('username')
@@ -98,6 +150,14 @@ def login(request):
         response.delete_cookie(key="refresh_token")
         return response
         
+@extend_schema(
+    summary="Refresh access token",
+    description="Uses the `refresh_token` httpOnly cookie to issue a new access token. No request body needed.",
+    request=None,
+    responses={200: inline_serializer("RefreshTokenResponse", fields={
+        "access_token": serializers.CharField(),
+    })},
+)
 @api_view(['POST'])
 def refresh_token(request):
     refresh_token = request.COOKIES.get('refresh_token')
@@ -109,6 +169,16 @@ def refresh_token(request):
     except Exception:
         return Response({"error": "Invalid or expired refresh token"}, status=400)
 
+@extend_schema(
+    summary="Get profile",
+    description="Returns the authenticated user's profile and all their past entries.",
+    responses={200: inline_serializer("ProfileResponse", fields={
+        "id": serializers.IntegerField(),
+        "username": serializers.CharField(),
+        "profile_picture_url": serializers.CharField(allow_null=True),
+        "entries": serializers.ListField(),
+    })},
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_profile(request):
@@ -126,6 +196,24 @@ def get_profile(request):
     }, status=200)
 
 
+@extend_schema(
+    summary="Add entry",
+    description="Creates today's song entry for the authenticated user. One entry per day.",
+    request=inline_serializer("AddEntryRequest", fields={
+        "song_id": serializers.IntegerField(),
+        "song_name": serializers.CharField(),
+        "song_artist": serializers.CharField(),
+        "song_album": serializers.CharField(),
+        "song_album_art": serializers.CharField(),
+        "song_preview_url": serializers.CharField(required=False),
+        "song_genre": serializers.CharField(required=False),
+        "comments": serializers.ListField(required=False),
+    }),
+    responses={201: inline_serializer("AddEntryResponse", fields={
+        "message": serializers.CharField(),
+        "entry": serializers.IntegerField(),
+    })},
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_entry(request):
@@ -157,6 +245,14 @@ def add_entry(request):
         return Response({"error": str(e)}, status=400)
 
 
+@extend_schema(
+    summary="Has posted today",
+    description="Returns whether the user has submitted an entry today, and includes that entry if so.",
+    responses={200: inline_serializer("HasPostedResponse", fields={
+        "has_posted": serializers.BooleanField(),
+        "entry": serializers.DictField(required=False),
+    })},
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def has_posted(request):
@@ -184,6 +280,17 @@ def has_posted(request):
         return Response({"has_posted": False}, status=200)
 
 
+@extend_schema(
+    summary="List friends",
+    description="Returns all friends. If the user has posted today, each friend's today entry is included (gated by the privacy model).",
+    responses={200: inline_serializer("FriendItem", fields={
+        "id": serializers.IntegerField(),
+        "friend_id": serializers.IntegerField(),
+        "friend_username": serializers.CharField(),
+        "profile_picture_url": serializers.CharField(allow_null=True),
+        "today_entry": serializers.DictField(allow_null=True),
+    }, many=True)},
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_friends(request):
@@ -220,6 +327,21 @@ def get_friends(request):
     return Response(result, status=200)
 
 
+@extend_schema(
+    summary="Add friend",
+    description="Adds another user as a friend by username. Returns the new friendship with their today entry if available.",
+    request=inline_serializer("AddFriendRequest", fields={
+        "username": serializers.CharField(),
+    }),
+    responses={201: inline_serializer("AddFriendResponse", fields={
+        "message": serializers.CharField(),
+        "id": serializers.IntegerField(),
+        "friend_id": serializers.IntegerField(),
+        "friend_username": serializers.CharField(),
+        "profile_picture_url": serializers.CharField(allow_null=True),
+        "today_entry": serializers.DictField(allow_null=True),
+    })},
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_friend(request):
@@ -262,6 +384,13 @@ def add_friend(request):
     }, status=201)
 
 
+@extend_schema(
+    summary="Remove friend",
+    description="Deletes a friendship by its ID. Only the user who created the friendship can remove it.",
+    responses={200: inline_serializer("RemoveFriendResponse", fields={
+        "message": serializers.CharField(),
+    })},
+)
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def remove_friend(request, friend_id):
@@ -273,6 +402,19 @@ def remove_friend(request, friend_id):
     friendship.delete()
     return Response({"message": "Friend removed"}, status=200)
 
+@extend_schema(
+    summary="Add comment",
+    description="Appends a comment to any entry. Returns the full updated comments array.",
+    request=inline_serializer("AddCommentRequest", fields={
+        "entry_id": serializers.IntegerField(),
+        "username": serializers.CharField(),
+        "text": serializers.CharField(),
+    }),
+    responses={201: inline_serializer("AddCommentResponse", fields={
+        "message": serializers.CharField(),
+        "comments": serializers.ListField(),
+    })},
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_comment(request):
@@ -292,6 +434,19 @@ def add_comment(request):
     entry.save()
     return Response({"message": "Comment added successfully", "comments": entry.comments}, status=201)
 
+@extend_schema(
+    summary="Update comment",
+    description="Edits the text of an existing comment by its index in the entry's comments array.",
+    request=inline_serializer("UpdateCommentRequest", fields={
+        "entry_id": serializers.IntegerField(),
+        "comment_index": serializers.IntegerField(),
+        "text": serializers.CharField(),
+    }),
+    responses={200: inline_serializer("UpdateCommentResponse", fields={
+        "message": serializers.CharField(),
+        "comments": serializers.ListField(),
+    })},
+)
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_comment(request):
@@ -315,6 +470,14 @@ def update_comment(request):
     return Response({"message": "Comment updated successfully", "comments": entry.comments}, status=200)
 
 
+@extend_schema(
+    summary="Delete comment",
+    description="Removes a comment at the given index. Only the comment's author (matched by username) can delete it.",
+    responses={200: inline_serializer("DeleteCommentResponse", fields={
+        "message": serializers.CharField(),
+        "comments": serializers.ListField(),
+    })},
+)
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_comment(request, entry_id, comment_index):
@@ -331,6 +494,17 @@ def delete_comment(request, entry_id, comment_index):
     entry.save()
     return Response({"message": "Comment deleted successfully", "comments": entry.comments}, status=200)
 
+@extend_schema(
+    summary="Update username",
+    description="Changes the authenticated user's username. The new username must be unique.",
+    request=inline_serializer("UpdateUsernameRequest", fields={
+        "new_username": serializers.CharField(),
+    }),
+    responses={200: inline_serializer("UpdateUsernameResponse", fields={
+        "message": serializers.CharField(),
+        "username": serializers.CharField(),
+    })},
+)
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_username(request):
@@ -345,6 +519,14 @@ def update_username(request):
     return Response({"message": "Username updated successfully", "username": user.username}, status=200)
 
 
+@extend_schema(
+    summary="Delete account",
+    description="Permanently deletes the authenticated user's account and clears the refresh token cookie.",
+    request=None,
+    responses={200: inline_serializer("DeleteAccountResponse", fields={
+        "message": serializers.CharField(),
+    })},
+)
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_account(request):
@@ -354,6 +536,14 @@ def delete_account(request):
     response.delete_cookie(key="refresh_token")
     return response
 
+@extend_schema(
+    summary="Delete today's entry",
+    description="Deletes the authenticated user's entry for today, allowing them to re-post.",
+    request=None,
+    responses={200: inline_serializer("DeleteEntryResponse", fields={
+        "message": serializers.CharField(),
+    })},
+)
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_today_entry(request):
@@ -405,6 +595,15 @@ def build_pie_svg(genre_list, size=120):
     )
 
 
+@extend_schema(
+    summary="Genre stats",
+    description="Returns the user's all-time genre breakdown with percentages, HSL colors, and a backend-generated SVG pie chart.",
+    responses={200: inline_serializer("GenreStatsResponse", fields={
+        "genres": serializers.ListField(),
+        "total": serializers.IntegerField(),
+        "svg": serializers.CharField(),
+    })},
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def genre_stats(request):

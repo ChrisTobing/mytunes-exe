@@ -23,6 +23,8 @@ function Root() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  console.log("Access Token:", accessToken);
+
   useEffect(() => {
     const bootstrap = async () => {
       try {
