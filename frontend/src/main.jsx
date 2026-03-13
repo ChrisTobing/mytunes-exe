@@ -11,6 +11,7 @@ import "./index.css";
 import App from "./App.jsx";
 import Login from "./Login.jsx";
 import Signup from "./SignUp.jsx";
+import { API_BASE_URL } from "./config.js";
 
 function ProtectedRoute({ accessToken, loading, children }) {
   if (loading) return null;
@@ -29,7 +30,7 @@ function Root() {
     const bootstrap = async () => {
       try {
         const refreshRes = await fetch(
-          "http://localhost:8000/api/auth/refresh/",
+          `${API_BASE_URL}/api/auth/refresh/`,
           {
             method: "POST",
             credentials: "include",
@@ -44,7 +45,7 @@ function Root() {
         const { access_token } = await refreshRes.json();
         setAccessToken(access_token);
 
-        const profileRes = await fetch("http://localhost:8000/api/profile/", {
+        const profileRes = await fetch(`${API_BASE_URL}/api/profile/`, {
           headers: { Authorization: `Bearer ${access_token}` },
         });
 

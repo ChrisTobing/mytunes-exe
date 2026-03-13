@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./CommentItem.css";
+import { API_BASE_URL } from "./config.js";
 
 function CommentItem({ comment, commentIndex, entryId, currentUser, accessToken, onUpdate, onDelete }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -12,7 +13,7 @@ function CommentItem({ comment, commentIndex, entryId, currentUser, accessToken,
     const trimmed = editValue.trim();
     if (!trimmed) return;
     setIsEditing(false);
-    await fetch("http://localhost:8000/api/update-comment/", {
+    await fetch(`${API_BASE_URL}/api/update-comment/`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -25,7 +26,7 @@ function CommentItem({ comment, commentIndex, entryId, currentUser, accessToken,
 
   async function handleDelete() {
     if (!window.confirm("Are you sure you want to delete this comment?")) return;
-    await fetch(`http://localhost:8000/api/entry/${entryId}/comment/${commentIndex}/delete/`, {
+    await fetch(`${API_BASE_URL}/api/entry/${entryId}/comment/${commentIndex}/delete/`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${accessToken}` },
     });

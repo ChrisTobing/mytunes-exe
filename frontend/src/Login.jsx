@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "xp.css/dist/XP.css";
 import "./Login.css";
 import loginLogo from "./assets/mytuneslogo.png";
+import { API_BASE_URL } from "./config.js";
 
 function Login({ setAccessToken, setUser }) {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ function Login({ setAccessToken, setUser }) {
       alert("Please fill in all fields");
       return;
     }
-    const response = await fetch("http://localhost:8000/api/auth/login/", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -28,7 +29,7 @@ function Login({ setAccessToken, setUser }) {
     if (response.ok) {
       const data = await response.json();
       setAccessToken(data.access_token);
-      const profileRes = await fetch("http://localhost:8000/api/profile/", {
+      const profileRes = await fetch(`${API_BASE_URL}/api/profile/`, {
         headers: { Authorization: `Bearer ${data.access_token}` },
       });
       if (profileRes.ok) {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import "xp.css/dist/XP.css";
 import "./Friends.css";
 import placeholderAlbumArt from "./assets/placeholderMusic.jpg";
+import { API_BASE_URL } from "./config.js";
 
 function Friends({ accessToken, hasPosted, friendEntries, setFriendEntries }) {
   const [selected, setSelected] = useState(null);
@@ -12,7 +13,7 @@ function Friends({ accessToken, hasPosted, friendEntries, setFriendEntries }) {
     const username = addInput.trim();
     if (!username) return;
     setAddError("");
-    fetch("http://localhost:8000/api/friends/add/", {
+    fetch(`${API_BASE_URL}/api/friends/add/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -42,7 +43,7 @@ function Friends({ accessToken, hasPosted, friendEntries, setFriendEntries }) {
 
   const handleRemove = () => {
     if (!selected) return;
-    fetch(`http://localhost:8000/api/friends/${selected.id}/remove/`, {
+    fetch(`${API_BASE_URL}/api/friends/${selected.id}/remove/`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${accessToken}` },
     })

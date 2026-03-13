@@ -3,6 +3,7 @@ import "./Profile.css";
 import placeholderAlbumArt from "./assets/placeholderMusic.jpg";
 import { useEffect, useRef, useState } from "react";
 import ConfirmModal from "./ConfirmModal";
+import { API_BASE_URL } from "./config.js";
 
 function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTodayEntry, setPosted }) {
   const [isEditingName, setIsEditingName] = useState(false);
@@ -19,7 +20,7 @@ function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTo
     // as multipart/form-data so Django's request.FILES can receive it.
     const formData = new FormData();
     formData.append("profile_picture", file);
-    const response = await fetch("http://localhost:8000/api/upload-profile-pic/", {
+    const response = await fetch(`${API_BASE_URL}/api/upload-profile-pic/`, {
       method: "POST",
       headers: { Authorization: `Bearer ${accessToken}` },
       body: formData,
@@ -38,7 +39,7 @@ function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTo
   async function handleSave() {
     // Api call
     console.log("Saving new username:", nameInput);
-    const response = await fetch("http://localhost:8000/api/update-username/", {
+    const response = await fetch(`${API_BASE_URL}/api/update-username/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -57,7 +58,7 @@ function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTo
   }
 
   async function handleDeleteEntry() {
-    const response = await fetch("http://localhost:8000/api/delete-entry/", {
+    const response = await fetch(`${API_BASE_URL}/api/delete-entry/`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${accessToken}` },
     });
@@ -73,7 +74,7 @@ function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTo
   }
 
   async function handleDeleteAccount() {
-    const response = await fetch("http://localhost:8000/api/delete-account/", {
+    const response = await fetch(`${API_BASE_URL}/api/delete-account/`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${accessToken}` },
     });
@@ -92,7 +93,7 @@ function Profile({ user, accessToken, setUser, setAccessToken, todayEntry, setTo
 
     useEffect(() => {
       async function fetchGenreStats() {
-        const response = await fetch("http://localhost:8000/api/genre-stats/", {
+        const response = await fetch(`${API_BASE_URL}/api/genre-stats/`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         if (response.ok) {

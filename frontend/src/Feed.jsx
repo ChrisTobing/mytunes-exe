@@ -4,6 +4,7 @@ import "./Feed.css";
 import placeholderAlbumArt from "./assets/placeholderMusic.jpg";
 import { combineFeed } from "./utils/functions";
 import CommentItem from "./CommentItem";
+import { API_BASE_URL } from "./config.js";
 
 function Feed({ user, entry, friendEntries, accessToken }) {
   const [feedData, setFeedData] = useState(() => combineFeed(entry, friendEntries));
@@ -34,7 +35,7 @@ function Feed({ user, entry, friendEntries, accessToken }) {
   async function handleSend() {
     const text = commentInput.trim();
     if (!text) return;
-    const response = await fetch("http://localhost:8000/api/add-comment/", {
+    const response = await fetch(`${API_BASE_URL}/api/add-comment/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,

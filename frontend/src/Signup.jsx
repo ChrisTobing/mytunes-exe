@@ -4,6 +4,7 @@ import "xp.css/dist/XP.css";
 import "./Login.css";
 import loginLogo from "./assets/mytuneslogo.png";
 import "./SignUp.css";
+import { API_BASE_URL } from "./config.js";
 
 function Signup() {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ function Signup() {
       alert("Passwords do not match");
       return;
     }
-    const response = await fetch("http://localhost:8000/api/auth/register/", {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -6,6 +6,7 @@ import EntryForm from "./EntryForm";
 import Friends from "./Friends";
 import Profile from "./Profile";
 import Taskbar from "./Taskbar";
+import { API_BASE_URL } from "./config.js";
 
 function App({ accessToken, setAccessToken, user, setUser }) {
   const [inputValue, setInputValue] = useState("");
@@ -27,7 +28,7 @@ function App({ accessToken, setAccessToken, user, setUser }) {
       return;
     }
     fetch(
-      `http://localhost:8000/api/songs/?query=${encodeURIComponent(query)}`,
+      `${API_BASE_URL}/api/songs/?query=${encodeURIComponent(query)}`,
       {
         headers: { Authorization: `Bearer ${accessToken}` },
       },
@@ -39,7 +40,7 @@ function App({ accessToken, setAccessToken, user, setUser }) {
   }, [searchClicked, inputValue]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/has-posted/", {
+    fetch(`${API_BASE_URL}/api/has-posted/`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
       .then((response) => response.json())
@@ -53,7 +54,7 @@ function App({ accessToken, setAccessToken, user, setUser }) {
 
   useEffect(() => {
     if (!hasPosted) return;
-    fetch("http://localhost:8000/api/friends/", {
+    fetch(`${API_BASE_URL}/api/friends/`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
       .then((response) => response.json())
@@ -99,7 +100,7 @@ function App({ accessToken, setAccessToken, user, setUser }) {
       { username: user.username, text: currentComment },
     ];
     setComments(newComments);
-    const response = await fetch("http://localhost:8000/api/add-entry/", {
+    const response = await fetch(`${API_BASE_URL}/api/add-entry/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -118,7 +119,7 @@ function App({ accessToken, setAccessToken, user, setUser }) {
     });
     if (response.ok) {
       const data = await response.json();
-      const profileRes = await fetch("http://localhost:8000/api/profile/", {
+      const profileRes = await fetch(`${API_BASE_URL}/api/profile/`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (profileRes.ok) {
@@ -156,7 +157,7 @@ function App({ accessToken, setAccessToken, user, setUser }) {
         <div className="window">
           <div className="title-bar">
             <div className="title-bar-text">
-              {user ? `Welcome, ${user.username}` : "Mytunes.exe"}
+              {user ? `Welcome, ${user.username}` : "Mytunes"}
             </div>
             <div className="title-bar-controls">
               <button aria-label="Close"></button>

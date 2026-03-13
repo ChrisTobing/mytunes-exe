@@ -49,22 +49,70 @@ Alternatively, run the backend server and visit `http://localhost:8000/api/docs/
 
 ## Getting started
 
-### Backend
+### Backend setup
 
+1. Create and activate virtual environment:
 ```bash
 cd backend
 python -m venv venv
 source venv/bin/activate       # Windows: venv\Scripts\activate
-pip install django djangorestframework djangorestframework-simplejwt django-cors-headers requests Pillow
+```
+
+2. Install dependencies:
+```bash
+pip install django djangorestframework djangorestframework-simplejwt django-cors-headers requests Pillow python-dotenv
+```
+
+3. Create `.env` file from example:
+```bash
+cp .env.example .env
+```
+
+4. (Optional) Update `.env` with custom values if deploying to production:
+```bash
+DJANGO_SECRET_KEY=your-secret-key-here
+DEBUG=False  # Set to False in production
+ALLOWED_HOSTS=localhost,127.0.0.1,yourdomain.com
+CORS_ALLOWED_ORIGINS=http://localhost:5173,https://yourdomain.com
+```
+
+5. Run migrations:
+```bash
 python manage.py migrate
+```
+
+6. (Optional) Create an admin account for Django admin panel:
+```bash
+python manage.py createsuperuser
+# Follow prompts to set username, email, and password
+# Access admin panel at: http://localhost:8000/admin/
+```
+
+7. Start development server:
+```bash
 python manage.py runserver     # http://localhost:8000
 ```
 
-### Frontend
+### Frontend setup
 
+1. Install dependencies:
 ```bash
 cd frontend
 npm install
+```
+
+2. Create `.env` file from example:
+```bash
+cp .env.example .env
+```
+
+3. (Optional) Update `.env` if backend is running on a different URL:
+```bash
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+4. Start dev server:
+```bash
 npm run dev                    # http://localhost:5173
 ```
 
