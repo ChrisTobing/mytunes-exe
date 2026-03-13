@@ -47,73 +47,61 @@ For complete endpoint documentation with request/response examples, see [mytunes
 
 Alternatively, run the backend server and visit `http://localhost:8000/api/docs/` for interactive Swagger UI documentation.
 
-## Getting started
+## Running locally
 
-### Backend setup
+Both the backend and frontend must be running at the same time. Open two terminal windows.
 
-1. Create and activate virtual environment:
+### Prerequisites
+
+- Python 3.10+
+- Node.js 18+
+
+### Terminal 1 — Backend
+
 ```bash
 cd backend
+
+# Create and activate virtual environment
 python -m venv venv
 source venv/bin/activate       # Windows: venv\Scripts\activate
-```
 
-2. Install dependencies:
-```bash
-pip install django djangorestframework djangorestframework-simplejwt django-cors-headers requests Pillow python-dotenv
-```
+# Install dependencies
+pip install -r requirements.txt
 
-3. Create `.env` file from example:
-```bash
+# Create your local .env file (no edits needed for local dev)
 cp .env.example .env
-```
 
-4. (Optional) Update `.env` with custom values if deploying to production:
-```bash
-DJANGO_SECRET_KEY=your-secret-key-here
-DEBUG=False  # Set to False in production
-ALLOWED_HOSTS=localhost,127.0.0.1,yourdomain.com
-CORS_ALLOWED_ORIGINS=http://localhost:5173,https://yourdomain.com
-```
-
-5. Run migrations:
-```bash
+# Apply database migrations
 python manage.py migrate
+
+# Start the backend server → http://localhost:8000
+python manage.py runserver
 ```
 
-6. (Optional) Create an admin account for Django admin panel:
-```bash
-python manage.py createsuperuser
-# Follow prompts to set username, email, and password
-# Access admin panel at: http://localhost:8000/admin/
-```
+### Terminal 2 — Frontend
 
-7. Start development server:
-```bash
-python manage.py runserver     # http://localhost:8000
-```
-
-### Frontend setup
-
-1. Install dependencies:
 ```bash
 cd frontend
+
+# Install dependencies
 npm install
-```
 
-2. Create `.env` file from example:
-```bash
+# Create your local .env file (no edits needed for local dev)
 cp .env.example .env
+
+# Start the frontend dev server → http://localhost:5173
+npm run dev
 ```
 
-3. (Optional) Update `.env` if backend is running on a different URL:
-```bash
-VITE_API_BASE_URL=http://localhost:8000
-```
+Open http://localhost:5173 in your browser. The frontend talks to the backend at http://localhost:8000 by default.
 
-4. Start dev server:
+### Optional: Django admin panel
+
+To access the admin panel at http://localhost:8000/admin/, create a superuser:
+
 ```bash
-npm run dev                    # http://localhost:5173
+# Inside backend/ with venv activated
+python manage.py createsuperuser
 ```
 
 ## Auth flow

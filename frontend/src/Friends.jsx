@@ -113,7 +113,9 @@ function Friends({ accessToken, hasPosted, friendEntries, setFriendEntries }) {
               />
               <span className="friendEntries-username">@{f.friend_username}</span>
               <span className="friendEntries-status">
-                {f.today_entry
+                {!hasPosted
+                  ? "— ???"
+                  : f.today_entry
                   ? `— Listening to: ${f.today_entry.song_artist} - ${f.today_entry.song_name}`
                   : "— Hasn't posted today ... yet."}
               </span>
@@ -134,7 +136,6 @@ function Friends({ accessToken, hasPosted, friendEntries, setFriendEntries }) {
 
       {/* Action buttons */}
       <div className="friendEntries-actions">
-        <button disabled={!selected}>View Profile</button>
         <button disabled={!selected} onClick={handleRemove}>
           Remove Friend
         </button>

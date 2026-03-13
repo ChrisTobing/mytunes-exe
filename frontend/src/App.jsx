@@ -140,7 +140,7 @@ function App({ accessToken, setAccessToken, user, setUser }) {
         created_at: new Date().toISOString(),
       });
       // TESTING ONLY: setPosted(true) removed so multiple entries can be submitted
-      // setPosted(true);
+      setPosted(true);
       setCurrentComment("");
       setComments([]);
       setSelectedTrack(null);
@@ -160,7 +160,13 @@ function App({ accessToken, setAccessToken, user, setUser }) {
               {user ? `Welcome, ${user.username}` : "Mytunes"}
             </div>
             <div className="title-bar-controls">
-              <button aria-label="Close"></button>
+              <button
+                aria-label="Close"
+                onClick={() => {
+                  setAccessToken(null);
+                  setUser(null);
+                }}
+              ></button>
             </div>
           </div>
           <div className="window-body">
