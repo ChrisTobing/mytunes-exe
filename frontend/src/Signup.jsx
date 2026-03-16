@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "xp.css/dist/XP.css";
 import "./Login.css";
 import loginLogo from "./assets/mytuneslogo.png";
-import "./SignUp.css";
+import "./Signup.css";
 import { API_BASE_URL } from "./config.js";
 
 function Signup() {

@@ -10,7 +10,7 @@ import {
 import "./index.css";
 import App from "./App.jsx";
 import Login from "./Login.jsx";
-import Signup from "./SignUp.jsx";
+import Signup from "./Signup.jsx";
 import { API_BASE_URL } from "./config.js";
 
 function ProtectedRoute({ accessToken, loading, children }) {
